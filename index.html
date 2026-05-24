@@ -5,58 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>2026 Christmas Party</title>
     <style>
-        /* CSS：確保手機版全螢幕顯示 */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background-color: #0b132b; color: #edf2f4; height: 100vh; overflow: hidden; }
         
-        /* 螢幕控制器 */
         .screen { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; }
-        
-        /* 迎賓畫面 */
         #welcomeScreen { z-index: 100; background: #0b132b; }
+        #appContainer { z-index: 1; display: none; padding: 20px; overflow-y: auto; align-items: flex-start; }
         
-        /* 主功能區 (預設隱藏) */
-        #appContainer { z-index: 1; display: none; padding: 20px; overflow-y: auto; }
-        
-        .tab-content { display: none; }
+        /* 分頁內容預設隱藏 */
+        .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
         
-        button { padding: 15px 30px; background: transparent; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 30px; cursor: pointer; }
+        .nav-btns { margin-bottom: 20px; display: flex; gap: 10px; }
+        button { padding: 10px 20px; background: #1c2541; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="welcomeScreen" class="screen">
         <h1>2026 CHRISTMAS</h1>
-        <p>PARTY CONTROLLER</p>
-        <button onclick="enterApp()" style="margin-top: 20px;">LAUNCH SYSTEM</button>
+        <button onclick="enterApp()">LAUNCH SYSTEM</button>
     </div>
 
-    <div id="appContainer" class="screen" style="justify-content: flex-start; padding-top: 50px;">
-        <div style="margin-bottom: 20px;">
+    <div id="appContainer" class="screen">
+        <div class="nav-btns">
             <button onclick="switchTab('accounting')">💰 記帳</button>
             <button onclick="switchTab('games')">🎮 遊戲</button>
         </div>
 
         <div id="accountingTab" class="tab-content active">
             <h2>派對記帳區</h2>
-        </div>
+            </div>
 
         <div id="gamesTab" class="tab-content">
             <h2>交換禮物區</h2>
-        </div>
+            </div>
     </div>
 
     <script>
-        // 切換進入 App
         function enterApp() {
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
         }
 
-        // 切換分頁
         function switchTab(tabName) {
+            // 隱藏所有頁面
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            // 顯示目標頁面
             document.getElementById(tabName + 'Tab').classList.add('active');
         }
     </script>
