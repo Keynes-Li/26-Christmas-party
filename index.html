@@ -24,8 +24,8 @@
         .tab-content.active { display: block; }
         
         /* 上方切換頁按鈕 */
-        .nav-btns { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; }
-        .nav-btns button { flex: 1; padding: 12px; background: #1c2541; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .nav-btns { display: flex; gap: 8px; margin-bottom: 20px; width: 100%; }
+        .nav-btns button { flex: 1; padding: 10px 5px; background: #1c2541; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; }
         .nav-btns button.active { background: #90e0ef; color: #0b132b; }
         
         .welcome-btn { padding: 15px 30px; background: transparent; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 30px; cursor: pointer; margin-top: 20px; font-size: 16px; letter-spacing: 2px; }
@@ -38,6 +38,7 @@
         input[type="text"], input[type="number"], select { width: 100%; padding: 12px; margin: 6px 0; background: #0b132b; border: 1px solid #3a506b; color: white; border-radius: 8px; font-size: 15px; }
         .action-btn { width: 100%; padding: 12px; background: #90e0ef; border: none; color: #0b132b; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; font-size: 15px; }
         .action-btn.secondary { background: transparent; border: 1px solid #ff0054; color: #ff0054; }
+        .action-btn.warning { background: #ff9f1c; color: #0b132b; border: none; }
 
         /* 成員標籤 */
         .tag-container { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -59,6 +60,12 @@
         
         /* 遊戲專用樣式 */
         .game-status { text-align: center; font-size: 22px; font-weight: bold; margin: 20px 0; color: #90e0ef; min-height: 30px; line-height: 1.4; }
+        
+        /* 抽禮物分組清單 */
+        .gift-group-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #3a506b; }
+        .gift-group-item select { width: auto; padding: 6px; margin: 0; font-size: 14px; }
+        .result-box { background: #0b132b; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 15px; }
+        .result-row { margin-bottom: 6px; }
     </style>
 </head>
 <body>
@@ -73,8 +80,9 @@
 
         <div id="appContainer">
             <div class="nav-btns">
-                <button id="nav-accounting" class="active" onclick="switchTab('accounting')">💰 派對記帳</button>
-                <button id="nav-games" onclick="switchTab('games')">🎮 聖誕遊戲</button>
+                <button id="nav-accounting" class="active" onclick="switchTab('accounting')">💰 記帳</button>
+                <button id="nav-games" onclick="switchTab('games')">🎮 遊戲</button>
+                <button id="nav-gifts" onclick="switchTab('gifts')">🎁 抽禮物</button>
             </div>
 
             <div id="accountingTab" class="tab-content active">
@@ -125,7 +133,6 @@
                         <select id="gamePlayerSelect" style="margin-bottom: 10px;">
                             <option value="">-- 送出前，請先選擇你是誰 --</option>
                         </select>
-
                         <input type="number" id="guessInput" placeholder="請輸入你的猜測數字">
                         <button class="action-btn" onclick="submitGuess()">送出猜測</button>
                     </div>
@@ -133,6 +140,32 @@
                     <button id="resetGameBtn" class="action-btn secondary" onclick="resetGame()" style="display: none; margin-top: 15px;">重新開始新遊戲</button>
                 </div>
             </div>
+
+            <div id="giftsTab" class="tab-content">
+                
+                <div class="card">
+                    <h3>🏷️ 好禮物分組設定</h3>
+                    <p style="font-size: 13px; color: #5c677d; margin-bottom: 10px;">請為大家選擇好禮物的價格組別，設定會即時同步。</p>
+                    <div id="giftGroupContainer">
+                        </div>
+                </div>
+
+                <div class="card">
+                    <h3>🎁 抽好禮物 (依組別)</h3>
+                    <div id="goodGiftResultsContainer" class="result-box" style="display:none; margin-bottom: 15px;"></div>
+                    <button id="drawGoodBtn" class="action-btn" onclick="drawGoodGifts()">🎲 進行好禮物抽籤</button>
+                </div>
+
+                <div class="card">
+                    <h3>💩 抽壞禮物 (全員大亂鬥)</h3>
+                    <div id="badGiftResultsContainer" class="result-box" style="display:none; margin-bottom: 15px;"></div>
+                    <button id="drawBadBtn" class="action-btn" onclick="drawBadGifts()">🎲 進行壞禮物抽籤</button>
+                </div>
+
+                <button class="action-btn secondary" onclick="resetGiftResults()" style="margin-bottom: 30px;">🔄 重新抽籤 (需輸入密碼)</button>
+
+            </div>
+
         </div>
 
     </div>
@@ -168,19 +201,18 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 全域變數快取資料庫狀態
+        // 全域變數
         let members = [];
         let expenses = {};
+        let giftTiers = {}; // 紀錄每人的組別 { "小明": "1500", "小華": "500" }
+        let giftResults = { good: null, bad: null }; // 紀錄抽籤結果
 
         // === [3] 成員功能邏輯 ===
         function addMember() {
             const input = document.getElementById('memberInput');
             const name = input.value.trim();
             if (name) {
-                if (members.includes(name)) {
-                    alert("名字重複囉！");
-                    return;
-                }
+                if (members.includes(name)) { alert("名字重複囉！"); return; }
                 let updated = [...members, name];
                 db.ref('party_data/members').set(updated).then(() => { input.value = ''; });
             }
@@ -194,43 +226,34 @@
         }
 
         function updateMemberUI() {
-            // 1. 更新成員標籤
+            // 記帳頁面
             const tagsContainer = document.getElementById('memberTagsContainer');
             tagsContainer.innerHTML = members.length ? '' : '<span style="color:#5c677d; font-size:14px; margin-top:8px;">暫無成員，請從上方新增</span>';
             members.forEach(m => {
                 tagsContainer.innerHTML += `<span class="tag">${m} <span class="tag-delete" onclick="removeMember('${m}')">✖</span></span>`;
             });
 
-            // 2. 更新付款人下拉選單
             const payerSelect = document.getElementById('payerSelect');
             payerSelect.innerHTML = '<option value="">-- 請選擇付款人 --</option>';
-            members.forEach(m => {
-                payerSelect.innerHTML += `<option value="${m}">${m}</option>`;
-            });
+            members.forEach(m => { payerSelect.innerHTML += `<option value="${m}">${m}</option>`; });
 
-            // 3. 更新分攤人核取方塊
             const splitContainer = document.getElementById('splitWithContainer');
             splitContainer.innerHTML = '';
             members.forEach(m => {
-                splitContainer.innerHTML += `
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="splitMember" value="${m}" checked> ${m}
-                    </label>
-                `;
+                splitContainer.innerHTML += `<label class="checkbox-label"><input type="checkbox" name="splitMember" value="${m}" checked> ${m}</label>`;
             });
 
-            // 4. 更新遊戲區的玩家選擇器
+            // 遊戲頁面
             const gamePlayerSelect = document.getElementById('gamePlayerSelect');
             if(gamePlayerSelect) {
                 let currentVal = gamePlayerSelect.value;
                 gamePlayerSelect.innerHTML = '<option value="">-- 送出前，請先選擇你是誰 --</option>';
-                members.forEach(m => {
-                    gamePlayerSelect.innerHTML += `<option value="${m}">${m}</option>`;
-                });
-                if(members.includes(currentVal)) {
-                    gamePlayerSelect.value = currentVal; // 記住使用者當前的選擇
-                }
+                members.forEach(m => { gamePlayerSelect.innerHTML += `<option value="${m}">${m}</option>`; });
+                if(members.includes(currentVal)) gamePlayerSelect.value = currentVal; 
             }
+
+            // 更新抽禮物分組介面
+            renderGiftGroupUI();
         }
 
         // === [4] 記帳核心功能 ===
@@ -238,25 +261,13 @@
             const purpose = document.getElementById('expensePurpose').value.trim();
             const amount = parseFloat(document.getElementById('expenseAmount').value);
             const payer = document.getElementById('payerSelect').value;
-            
-            const checkedBoxes = document.querySelectorAll('input[name="splitMember"]:checked');
-            let splitWith = [];
-            checkedBoxes.forEach(cb => splitWith.push(cb.value));
+            const splitWith = Array.from(document.querySelectorAll('input[name="splitMember"]:checked')).map(cb => cb.value);
 
             if (!purpose || isNaN(amount) || amount <= 0 || !payer || splitWith.length === 0) {
-                alert("請填寫完整的消費項目、金額、付款人，並至少勾選一位分攤人！");
-                return;
+                alert("請填寫完整的消費項目、金額、付款人，並至少勾選一位分攤人！"); return;
             }
 
-            const newExpenseData = {
-                purpose: purpose,
-                amount: amount,
-                payer: payer,
-                splitWith: splitWith,
-                timestamp: Date.now()
-            };
-
-            db.ref('party_data/expenses').push(newExpenseData).then(() => {
+            db.ref('party_data/expenses').push({ purpose, amount, payer, splitWith, timestamp: Date.now() }).then(() => {
                 document.getElementById('expensePurpose').value = '';
                 document.getElementById('expenseAmount').value = '';
                 alert("消費記錄已同步上傳！");
@@ -264,15 +275,12 @@
         }
 
         function deleteExpense(key) {
-            if (confirm("確定要刪除這筆消費紀錄嗎？")) {
-                db.ref(`party_data/expenses/${key}`).remove();
-            }
+            if (confirm("確定要刪除這筆消費紀錄嗎？")) db.ref(`party_data/expenses/${key}`).remove();
         }
 
         function updateExpenseAndSettlementUI() {
             const listContainer = document.getElementById('expenseListContainer');
             listContainer.innerHTML = '';
-            
             let hasData = false;
             for (let key in expenses) {
                 hasData = true;
@@ -280,30 +288,20 @@
                 listContainer.innerHTML += `
                     <div class="list-item">
                         <div class="list-item-info">
-                            <b>${exp.purpose}</b><br>
-                            <span style="color:#90e0ef">$${exp.amount}</span> 元 ── 由 <b>${exp.payer}</b> 支付<br>
+                            <b>${exp.purpose}</b><br><span style="color:#90e0ef">$${exp.amount}</span> 元 ── 由 <b>${exp.payer}</b> 支付<br>
                             <span style="color:#5c677d; font-size:12px;">分攤：${exp.splitWith.join(', ')}</span>
                         </div>
                         <button class="delete-btn" onclick="deleteExpense('${key}')">❌ 刪除</button>
-                    </div>
-                `;
+                    </div>`;
             }
-            if (!hasData) {
-                listContainer.innerHTML = '<div style="color:#5c677d; font-size:14px; text-align:center; padding:10px;">目前尚無消費明細</div>';
-            }
-
+            if (!hasData) listContainer.innerHTML = '<div style="color:#5c677d; font-size:14px; text-align:center; padding:10px;">目前尚無消費明細</div>';
             runSettlementAlgorithm();
         }
 
-        // === [5] 金流清算演算法 ===
         function runSettlementAlgorithm() {
             const container = document.getElementById('settlementContainer');
             container.innerHTML = '';
-
-            if (members.length === 0) {
-                container.innerHTML = '<span style="color:#5c677d; font-size:14px;">請先建立成員名單</span>';
-                return;
-            }
+            if (members.length === 0) { container.innerHTML = '<span style="color:#5c677d; font-size:14px;">請先建立成員名單</span>'; return; }
 
             let balances = {};
             members.forEach(m => balances[m] = 0);
@@ -311,151 +309,224 @@
             for (let key in expenses) {
                 let exp = expenses[key];
                 let amt = parseFloat(exp.amount) || 0;
-                let payer = exp.payer;
-                let splitters = exp.splitWith || [];
-
-                if (balances[payer] !== undefined) balances[payer] += amt;
-                
-                let perPersonShare = amt / splitters.length;
-                splitters.forEach(p => {
-                    if (balances[p] !== undefined) balances[p] -= perPersonShare;
-                });
+                if (balances[exp.payer] !== undefined) balances[exp.payer] += amt;
+                let share = amt / (exp.splitWith || []).length;
+                (exp.splitWith || []).forEach(p => { if (balances[p] !== undefined) balances[p] -= share; });
             }
 
-            let debtors = [];
-            let creditors = [];
+            let debtors = [], creditors = [];
             for (let m in balances) {
-                let bal = balances[m];
-                if (bal < -0.01) {
-                    debtors.push({ name: m, amount: -bal });
-                } else if (bal > 0.01) {
-                    creditors.push({ name: m, amount: bal });
-                }
+                if (balances[m] < -0.01) debtors.push({ name: m, amount: -balances[m] });
+                else if (balances[m] > 0.01) creditors.push({ name: m, amount: balances[m] });
             }
-
             debtors.sort((a, b) => b.amount - a.amount);
             creditors.sort((a, b) => b.amount - a.amount);
 
             let instructions = [];
             let i = 0, j = 0;
-
             while (i < debtors.length && j < creditors.length) {
-                let d = debtors[i];
-                let c = creditors[j];
+                let d = debtors[i], c = creditors[j];
                 let transfer = Math.min(d.amount, c.amount);
-
-                if (transfer > 0.1) {
-                    instructions.push(`🔹 <b>${d.name}</b> 應轉給 <b>${c.name}</b> <span style="color:#70e000; font-weight:bold;">$${Math.round(transfer)}</span> 元`);
-                }
-
-                d.amount -= transfer;
-                c.amount -= transfer;
-
+                if (transfer > 0.1) instructions.push(`🔹 <b>${d.name}</b> 應轉給 <b>${c.name}</b> <span style="color:#70e000; font-weight:bold;">$${Math.round(transfer)}</span> 元`);
+                d.amount -= transfer; c.amount -= transfer;
                 if (d.amount <= 0.1) i++;
                 if (c.amount <= 0.1) j++;
             }
 
-            if (instructions.length === 0) {
-                container.innerHTML = '<div style="color:#70e000; font-size:14px; text-align:center;">帳目完全平衡！目前誰也不欠誰 👍</div>';
-            } else {
-                instructions.forEach(ins => {
-                    container.innerHTML += `<div class="settle-item">${ins}</div>`;
-                });
-            }
+            if (instructions.length === 0) container.innerHTML = '<div style="color:#70e000; font-size:14px; text-align:center;">帳目完全平衡！👍</div>';
+            else instructions.forEach(ins => { container.innerHTML += `<div class="settle-item">${ins}</div>`; });
         }
 
-        // === [6] 遊戲模組：雲端連線終極密碼 ===
+        // === [5] 遊戲模組 ===
         function initGameSync() {
             db.ref('party_data/game').on('value', (snapshot) => {
                 const game = snapshot.val();
                 const msgDiv = document.getElementById('gameMsg');
                 const controls = document.getElementById('gameControls');
                 const resetBtn = document.getElementById('resetGameBtn');
-
-                if (!game) {
-                    resetGame();
-                    return;
-                }
+                if (!game) { resetGame(); return; }
 
                 if (game.gameOver) {
                     msgDiv.innerHTML = `<span style="color:#ff0054;">${game.msg}</span>`;
-                    controls.style.display = 'none';
-                    resetBtn.style.display = 'block';
+                    controls.style.display = 'none'; resetBtn.style.display = 'block';
                 } else {
                     msgDiv.innerHTML = `${game.min} ~ ${game.max}`;
-                    controls.style.display = 'block';
-                    resetBtn.style.display = 'none';
+                    controls.style.display = 'block'; resetBtn.style.display = 'none';
                 }
             });
         }
-
         function resetGame() {
-            let answerRandom = Math.floor(Math.random() * 100) + 1;
-            db.ref('party_data/game').set({
-                answer: answerRandom,
-                min: 1,
-                max: 100,
-                gameOver: false,
-                msg: "1 ~ 100"
-            });
+            db.ref('party_data/game').set({ answer: Math.floor(Math.random() * 100) + 1, min: 1, max: 100, gameOver: false, msg: "1 ~ 100" });
             document.getElementById('guessInput').value = '';
         }
-
         function submitGuess() {
-            // 確認是誰在玩
-            const playerSelect = document.getElementById('gamePlayerSelect');
-            const playerName = playerSelect ? playerSelect.value : "";
-            
-            if (!playerName) {
-                alert("請先選擇你是誰，這樣大家才知道是誰引爆的！");
-                return;
-            }
-
-            const input = document.getElementById('guessInput');
-            const guess = parseInt(input.value);
-            
-            if (isNaN(guess) || !guess) {
-                alert("請輸入有效的數字！");
-                return;
-            }
+            const playerName = document.getElementById('gamePlayerSelect')?.value;
+            if (!playerName) { alert("請先選擇你是誰！"); return; }
+            const guess = parseInt(document.getElementById('guessInput').value);
+            if (isNaN(guess) || !guess) { alert("請輸入有效的數字！"); return; }
 
             db.ref('party_data/game').once('value', (snapshot) => {
                 let game = snapshot.val();
                 if (!game || game.gameOver) return;
-
-                if (guess <= game.min || guess >= game.max) {
-                    alert(`請猜有效範圍內 (${game.min} ~ ${game.max}) 的數字！`);
-                    return;
-                }
+                if (guess <= game.min || guess >= game.max) { alert(`請猜有效範圍 (${game.min} ~ ${game.max})！`); return; }
 
                 if (guess === game.answer) {
                     game.gameOver = true;
-                    // 將爆炸者的名字寫入廣播訊息
                     game.msg = `🎉 💥 爆炸了！！<br>【 ${playerName} 】踩中地雷！<br>密碼是 ${game.answer}`;
-                } else if (guess < game.answer) {
-                    game.min = Math.max(game.min, guess);
-                } else {
-                    game.max = Math.min(game.max, guess);
-                }
-
-                db.ref('party_data/game').set(game).then(() => {
-                    input.value = '';
-                });
+                } else if (guess < game.answer) game.min = Math.max(game.min, guess);
+                else game.max = Math.min(game.max, guess);
+                db.ref('party_data/game').set(game).then(() => { document.getElementById('guessInput').value = ''; });
             });
         }
 
-        // === [7] 資料即時監聽與初始化掛載 ===
-        db.ref('party_data/members').on('value', (snapshot) => {
-            members = snapshot.val() || [];
-            updateMemberUI();
-            runSettlementAlgorithm(); 
-        });
+        // === [6] 🎁 抽禮物專區邏輯 ===
 
-        db.ref('party_data/expenses').on('value', (snapshot) => {
-            expenses = snapshot.val() || {};
-            updateExpenseAndSettlementUI();
-        });
+        // 更新分組介面
+        function renderGiftGroupUI() {
+            const container = document.getElementById('giftGroupContainer');
+            if (members.length === 0) {
+                container.innerHTML = '<div style="color:#5c677d; font-size:14px; text-align:center;">請先至記帳頁面新增成員</div>';
+                return;
+            }
+            container.innerHTML = '';
+            members.forEach(m => {
+                let currentTier = giftTiers[m] || "";
+                container.innerHTML += `
+                    <div class="gift-group-item">
+                        <span>👤 ${m}</span>
+                        <select onchange="updateGiftTier('${m}', this.value)">
+                            <option value="" ${currentTier==="" ? "selected":""}>未分組</option>
+                            <option value="1500" ${currentTier==="1500" ? "selected":""}>1500元組</option>
+                            <option value="1000" ${currentTier==="1000" ? "selected":""}>1000元組</option>
+                            <option value="500" ${currentTier==="500" ? "selected":""}>500元組</option>
+                        </select>
+                    </div>
+                `;
+            });
+        }
 
+        function updateGiftTier(member, tier) {
+            db.ref(`party_data/gift_tiers/${member}`).set(tier);
+        }
+
+        // 核心演算法：錯排洗牌 (自己不能抽到自己)
+        function shuffleDerangement(arr) {
+            if (arr.length <= 1) return null; // 1個人無法不抽到自己
+            let copy = [...arr];
+            let isDerangement = false;
+            while (!isDerangement) {
+                // Fisher-Yates 洗牌
+                for (let i = copy.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [copy[i], copy[j]] = [copy[j], copy[i]];
+                }
+                // 檢查是否有人在原位 (自己抽到自己)
+                isDerangement = true;
+                for (let i = 0; i < arr.length; i++) {
+                    if (arr[i] === copy[i]) { isDerangement = false; break; }
+                }
+            }
+            return copy;
+        }
+
+        function drawGoodGifts() {
+            // 將人員依照 1500, 1000, 500 分組
+            let groups = { "1500": [], "1000": [], "500": [] };
+            members.forEach(m => {
+                let tier = giftTiers[m];
+                if (tier && groups[tier]) groups[tier].push(m);
+            });
+
+            let newResults = {};
+            let hasError = false;
+
+            for (let t in groups) {
+                let groupMembers = groups[t];
+                if (groupMembers.length === 1) {
+                    alert(`❌ 錯誤：【${t}元組】只有一個人，無法進行抽籤喔！請先調整分組。`);
+                    hasError = true;
+                    break;
+                }
+                if (groupMembers.length > 1) {
+                    let shuffled = shuffleDerangement(groupMembers);
+                    // 紀錄 抽籤人 -> 抽到誰的禮物
+                    newResults[t] = groupMembers.map((m, i) => ({ drawer: m, gotGiftFrom: shuffled[i] }));
+                }
+            }
+
+            if (!hasError && Object.keys(newResults).length > 0) {
+                db.ref('party_data/gift_results/good').set(newResults);
+            } else if (!hasError) {
+                alert("目前沒有任何人被分配到組別內喔！");
+            }
+        }
+
+        function drawBadGifts() {
+            if (members.length <= 1) {
+                alert("人數不足，無法進行壞禮物抽籤！");
+                return;
+            }
+            let shuffled = shuffleDerangement(members);
+            let newResults = members.map((m, i) => ({ drawer: m, gotGiftFrom: shuffled[i] }));
+            db.ref('party_data/gift_results/bad').set(newResults);
+        }
+
+        // 隱藏密碼防護：重置抽籤結果
+        function resetGiftResults() {
+            let pwd = prompt("主辦人專用：請輸入管理員密碼以重置抽籤結果");
+            if (pwd === "9527") {
+                db.ref('party_data/gift_results').remove();
+                alert("✅ 抽籤結果已全部清除，可以重新抽籤囉！");
+            } else if (pwd !== null) {
+                alert("❌ 密碼錯誤，拒絕重置！");
+            }
+        }
+
+        // 監聽並渲染抽籤結果畫面
+        function renderGiftResultsUI() {
+            const goodBox = document.getElementById('goodGiftResultsContainer');
+            const badBox = document.getElementById('badGiftResultsContainer');
+            const drawGoodBtn = document.getElementById('drawGoodBtn');
+            const drawBadBtn = document.getElementById('drawBadBtn');
+
+            // 處理好禮物
+            if (giftResults && giftResults.good) {
+                drawGoodBtn.style.display = 'none';
+                goodBox.style.display = 'block';
+                goodBox.innerHTML = '';
+                ['1500', '1000', '500'].forEach(t => {
+                    if (giftResults.good[t]) {
+                        goodBox.innerHTML += `<div style="color:#ff9f1c; font-weight:bold; margin: 10px 0 5px 0;">✨ ${t}元組：</div>`;
+                        giftResults.good[t].forEach(res => {
+                            goodBox.innerHTML += `<div class="result-row"><b>${res.drawer}</b> 抽到 👉 <b>${res.gotGiftFrom}</b> 的禮物</div>`;
+                        });
+                    }
+                });
+            } else {
+                drawGoodBtn.style.display = 'block';
+                goodBox.style.display = 'none';
+            }
+
+            // 處理壞禮物
+            if (giftResults && giftResults.bad) {
+                drawBadBtn.style.display = 'none';
+                badBox.style.display = 'block';
+                badBox.innerHTML = `<div style="color:#ff9f1c; font-weight:bold; margin-bottom: 5px;">💩 壞禮物大亂鬥：</div>`;
+                giftResults.bad.forEach(res => {
+                    badBox.innerHTML += `<div class="result-row"><b>${res.drawer}</b> 抽到 👉 <b>${res.gotGiftFrom}</b> 的壞禮物</div>`;
+                });
+            } else {
+                drawBadBtn.style.display = 'block';
+                badBox.style.display = 'none';
+            }
+        }
+
+        // === [7] 資料即時監聽掛載 ===
+        db.ref('party_data/members').on('value', (snapshot) => { members = snapshot.val() || []; updateMemberUI(); });
+        db.ref('party_data/expenses').on('value', (snapshot) => { expenses = snapshot.val() || {}; updateExpenseAndSettlementUI(); });
+        db.ref('party_data/gift_tiers').on('value', (snapshot) => { giftTiers = snapshot.val() || {}; renderGiftGroupUI(); });
+        db.ref('party_data/gift_results').on('value', (snapshot) => { giftResults = snapshot.val() || { good: null, bad: null }; renderGiftResultsUI(); });
+        
         initGameSync();
     </script>
 </body>
