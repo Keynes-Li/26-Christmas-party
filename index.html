@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>出遊遊戲小幫手</title>
+    
+    <!-- PWA iOS 專屬優化設定 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="出遊小幫手">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <!-- PWA 標準設定檔 -->
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        :root {
+            --bg-color: #fcfbfa; /* 質感奶油白 */
+            --card-bg: #ffffff;
+            --text-main: #3d3a36;
+            --accent: #d4af37; /* 質感金 */
+            --border-color: #eae7e2;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px 20px 80px 20px; /* 底部留空間給導覽列 */
+            box-sizing: border-box;
+        }
+
+        h2 { margin-top: 10px; font-weight: 600; color: #5c5852; }
+
+        /* 卡片樣式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+        }
+
+        /* 分頁切換機制 */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* 底部導覽列 */
+        .nav-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 65px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: env(safe-area-inset-bottom); /* 適應 iPhone 底部海苔條 */
+        }
+
+        .nav-btn {
+            background: none; border: none;
+            color: #8e8a84; font-size: 14px; font-weight: bold;
+            cursor: pointer; padding: 10px;
+        }
+
+        .nav-btn.active { color: var(--accent); }
+
+        /* 表單與按鈕 */
+        input, button {
+            width: 100%; padding: 12px; margin: 6px 0;
+            border-radius: 8px; border: 1px solid var(--border-color);
+            box-sizing: border-box; font-size: 16px;
+        }
+        input:focus { outline: none; border-color: var(--accent); }
+        button { background: var(--text-main); color: white; border: none; font-weight: bold; }
+        button:active { opacity: 0.8; }
+
+        /* 列表樣式 */
+        .list-item {
+            display: flex; justify-content: space-between;
+            padding: 10px 0; border-bottom: 1px solid var(--border-color);
+        }
+        .list-item:last-child { border: none; }
+    </style>
+</head>
+<body>
+
+    <!-- ================= 分頁 1：遊戲規則 ================= -->
+    <div id="page-rules" class="page active">
+        <h2>🎮 遊戲規則說明</h2>
+        <div class="card">
+            <h3>第一關：誰是臥底</h3>
+            <p style="line-height: 1.6; color: #6e6a64;">
+                1. 每人抽到一個詞彙，其中一人為臥底（詞彙有些許不同）。<br>
+                2. 每輪用一句話描述自己的詞，不能直接說出該詞。<br>
+                3. 投票選出可疑的人，抓出臥底則平民獲勝！
+            </p>
+        </div>
+        <div class="card">
+            <h3>第二關：骰子大賽</h3>
+            <p style="line-height: 1.6; color: #6e6a64;">
+                點數大贏小。輸的人要在記帳區「主動幫大家付飲料錢」！
+            </p>
+        </div>
+    </div>
+
+    <!-- ================= 分頁 2：公費記帳 ================= -->
+    <div id="page-expenses" class="page">
+        <h2>💰 旅程公費記帳</h2>
+        <div class="card">
+            <input type="text" id="exp-item" placeholder="品項 (例如：午餐、車資)">
+            <input type="number" id="exp-amount" placeholder="金額 ($)">
+            <button onclick="addExpense()">新增消費</button>
+        </div>
+        <div class="card">
+            <h3>總計金額：$<span id="total-amount">0</span></h3>
+            <div id="expense-list"><!-- 動態渲染 --></div>
+            <button style="background:#cc4444; margin-top:15px;" onclick="clearExpenses()">清空帳務</button>
+        </div>
+    </div>
+
+    <!-- ================= 分頁 3：遊戲點數 ================= -->
+    <div id="page-scores" class="page">
+        <h2>🏆 玩家計分板</h2>
+        <div class="card">
+            <input type="text" id="player-name" placeholder="玩家名字">
+            <button onclick="addPlayer()">新增玩家</button>
+        </div>
+        <div id="player-list"><!-- 動態渲染 --></div>
+    </div>
+
+    <!-- ================= 底部導覽列 ================= -->
+    <div class="nav-bar">
+        <button class="nav-btn active" onclick="switchPage('rules', this)">🎮 規則</button>
+        <button class="nav-btn" onclick="switchPage('expenses', this)">💰 記帳</button>
+        <button class="nav-btn" onclick="switchPage('scores', this)">🏆 計分</button>
+    </div>
+
+    <script>
+        // --- 分頁切換邏輯 ---
+        function switchPage(pageId, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // --- 記帳功能邏輯 ---
+        let expenses = JSON.parse(localStorage.getItem('trip_expenses')) || [];
+        function renderExpenses() {
+            const list = document.getElementById('expense-list');
+            let total = 0;
+            list.innerHTML = expenses.map(item => {
+                total += item.amount;
+                return `<div class="list-item"><span>${item.text}</span><strong>$${item.amount}</strong></div>`;
+            }).join('');
+            document.getElementById('total-amount').innerText = total;
+            localStorage.setItem('trip_expenses', JSON.stringify(expenses));
+        }
+        function addExpense() {
+            const text = document.getElementById('exp-item').value;
+            const amount = parseInt(document.getElementById('exp-amount').value);
+            if(!text || !amount) return;
+            expenses.push({ text, amount });
+            renderExpenses();
+            document.getElementById('exp-item').value = '';
+            document.getElementById('exp-amount').value = '';
+        }
+        function clearExpenses() {
+            if(confirm('確定要清空所有帳務嗎？')) { expenses = []; renderExpenses(); }
+        }
+
+        // --- 計分功能邏輯 ---
+        let players = JSON.parse(localStorage.getItem('game_players')) || [];
+        function renderPlayers() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = players.map((p, index) => `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="font-size:18px;">${p.name}</strong>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button style="width:40px; padding:8px;" onclick="updateScore(${index}, -1)">-</button>
+                        <span style="font-size:20px; font-weight:bold; min-width:30px; text-align:center;">${p.score}</span>
+                        <button style="width:40px; padding:8px;" onclick="updateScore(${index}, 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+            localStorage.setItem('game_players', JSON.stringify(players));
+        }
+        function addPlayer() {
+            const name = document.getElementById('player-name').value;
+            if(!name) return;
+            players.push({ name, score: 0 });
+            renderPlayers();
+            document.getElementById('player-name').value = '';
+        }
+        function updateScore(index, change) {
+            players[index].score += change;
+            renderPlayers();
+        }
+
+        // 初始渲染
+        renderExpenses();
+        renderPlayers();
+
+        // 註冊 Service Worker (PWA 必要，此處用簡單的註冊形式)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js').catch(() => {});
+        }
+    </script>
+</body>
+</html>
