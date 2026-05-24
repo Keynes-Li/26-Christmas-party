@@ -4,38 +4,243 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2026 Christmas Party</title>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <link rel="manifest" href="manifest.json">
     <style>
-        :root { --bg-color: #0b132b; --card-bg: #1c2541; --primary-light: #90e0ef; --accent-blue: #00b4d8; --text-main: #edf2f4; --text-muted: #a2d2ff; --border-color: #3a506b; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; overflow-x: hidden; }
-        .app-container { width: 100%; max-width: 500px; padding: 20px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 40px; }
-        #welcomeScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; }
-        #welcomeScreen.hide { opacity: 0; transform: translateY(-100%); pointer-events: none; }
-        .welcome-title { font-size: 28px; font-weight: 300; letter-spacing: 4px; color: var(--primary-light); text-shadow: 0 0 12px rgba(144, 224, 239, 0.4); margin-bottom: 10px; text-align: center; }
-        .welcome-subtitle { font-size: 14px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 50px; opacity: 0.8; }
-        .enter-btn { margin-top: 80px; background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 14px 40px; border-radius: 30px; font-size: 15px; letter-spacing: 2px; cursor: pointer; }
-        header { text-align: center; padding: 20px 0 10px 0; border-bottom: 1px solid var(--border-color); }
-        header h1 { font-size: 22px; font-weight: 400; letter-spacing: 2px; color: var(--primary-light); }
+        :root {
+            --bg-color: #0b132b;       /* 清爽深藍底色 */
+            --card-bg: #1c2541;        /* 稍微淺一點的藍黑卡片 */
+            --primary-light: #90e0ef;  /* 核心：清透淡藍色 */
+            --accent-blue: #00b4d8;    /* 輔助藍色 */
+            --text-main: #edf2f4;      /* 主要文字顏色 */
+            --text-muted: #a2d2ff;    /* 次要淡藍文字 */
+            --border-color: #3a506b;   /* 細緻邊框藍 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 40px;
+        }
+
+        /* ================= 🌟 科技感主畫面樣式 ================= */
+        #welcomeScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px;
+        }
+
+        /* 點擊後的消失動畫 */
+        #welcomeScreen.hide {
+            opacity: 0;
+            transform: translateY(-100%);
+            pointer-events: none;
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            color: var(--primary-light);
+            text-shadow: 0 0 12px rgba(144, 224, 239, 0.4);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .welcome-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin-bottom: 50px;
+            opacity: 0.8;
+        }
+
+        /* 純 CSS 繪製的極簡幾何科技聖誕樹 */
+        .tech-tree {
+            position: relative;
+            width: 0;
+            height: 0;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 80px solid rgba(144, 224, 239, 0.15);
+            margin-bottom: 10px;
+            animation: pulse 3s infinite ease-in-out;
+        }
+        .tech-tree::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: -80px;
+            width: 0;
+            height: 0;
+            border-left: 80px solid transparent;
+            border-right: 80px solid transparent;
+            border-bottom: 100px solid rgba(144, 224, 239, 0.1);
+        }
+        .tech-tree::after {
+            content: '';
+            position: absolute;
+            top: 90px;
+            left: -100px;
+            width: 0;
+            height: 0;
+            border-left: 100px solid transparent;
+            border-right: 100px solid transparent;
+            border-bottom: 120px solid rgba(144, 224, 239, 0.05);
+        }
+
+        /* 樹頂的科技十字星 */
+        .tree-star {
+            width: 12px;
+            height: 12px;
+            background: var(--primary-light);
+            position: absolute;
+            top: -15px;
+            left: -6px;
+            transform: rotate(45deg);
+            box-shadow: 0 0 15px var(--primary-light);
+            animation: blink 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(144, 224, 239, 0.2)); }
+            50% { filter: drop-shadow(0 0 20px rgba(144, 224, 239, 0.5)); }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; transform: rotate(45deg) scale(1.2); }
+        }
+
+        .enter-btn {
+            margin-top: 80px;
+            background: transparent;
+            border: 1px solid var(--primary-light);
+            color: var(--primary-light);
+            padding: 14px 40px;
+            border-radius: 30px;
+            font-size: 15px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(144, 224, 239, 0.1);
+        }
+        .enter-btn:hover {
+            background: rgba(144, 224, 239, 0.1);
+            box-shadow: 0 0 20px rgba(144, 224, 239, 0.3);
+        }
+
+        /* ================= 📊 後台主內容樣式 ================= */
+        header {
+            text-align: center;
+            padding: 20px 0 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        header h1 {
+            font-size: 22px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            color: var(--primary-light);
+        }
+
         .tabs { display: flex; gap: 10px; margin-bottom: 5px; }
-        .tab-btn { flex: 1; padding: 12px; background: rgba(28, 37, 65, 0.5); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; cursor: pointer; }
-        .tab-btn.active { background: var(--card-bg); border-color: var(--primary-light); color: var(--primary-light); }
+        .tab-btn {
+            flex: 1; padding: 12px; background: rgba(28, 37, 65, 0.5);
+            border: 1px solid var(--border-color); color: var(--text-muted);
+            border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--card-bg); border-color: var(--primary-light); color: var(--primary-light);
+            box-shadow: 0 0 10px rgba(144, 224, 239, 0.1);
+        }
+
         .tab-content { display: none; flex-direction: column; gap: 20px; }
         .tab-content.active { display: flex; }
-        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; }
-        .card-title { display: flex; justify-content: space-between; align-items: center; font-size: 16px; color: var(--primary-light); margin-bottom: 15px; }
+
+        .card {
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .card-title { font-size: 16px; color: var(--primary-light); margin-bottom: 15px; font-weight: 500; }
+
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input, select { flex: 1; background-color: rgba(11, 19, 43, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-main); }
-        button { background-color: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 10px 16px; border-radius: 8px; cursor: pointer; }
-        button.btn-block { width: 100%; margin-top: 5px; }
-        button.btn-danger { border-color: #ef233c; color: #ef233c; padding: 4px 10px; font-size: 12px; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(58, 80, 107, 0.3); }
+        input[type="text"], input[type="number"], select {
+            flex: 1;
+            min-width: 0; /* 💡 關鍵：加上這一行，防止金額框框飛出去 */
+            background-color: rgba(11, 19, 43, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+        }
+        button {
+            background-color: transparent; border: 1px solid var(--primary-light); color: var(--primary-light);
+            padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s;
+        }
+        button:hover { background-color: rgba(144, 224, 239, 0.1); }
+        button.btn-block { width: 100%; background-color: rgba(144, 224, 239, 0.05); margin-top: 5px; }
+
+        .member-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag {
+            background-color: rgba(58, 80, 107, 0.4); border: 1px solid var(--border-color);
+            color: var(--text-muted); padding: 6px 12px; border-radius: 20px; font-size: 13px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .tag .remove-btn { cursor: pointer; color: #ef233c; font-weight: bold; }
+
+        .checkbox-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px; margin: 10px 0 15px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 8px;
+        }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(58, 80, 107, 0.3); font-size: 14px; }
+        .list-item:last-child { border-bottom: none; }
         .item-detail { display: flex; flex-direction: column; gap: 4px; }
         .item-subtitle { font-size: 12px; color: var(--text-muted); }
         .amount-txt { color: var(--primary-light); font-weight: 500; }
-        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.1); padding: 10px; border-radius: 8px; }
-        .lucky-display { font-size: 28px; text-align: center; padding: 30px 10px; border: 1px dashed var(--border-color); color: var(--primary-light); margin-bottom: 15px; }
+
+        .settle-route {
+            background-color: rgba(144, 224, 239, 0.03); border-left: 3px solid var(--primary-light);
+            padding: 12px; margin-bottom: 10px; border-radius: 0 8px 8px 0; font-size: 14px; display: flex; justify-content: space-between;
+        }
+
+        .lucky-display {
+            font-size: 28px; text-align: center; padding: 30px 10px; color: var(--primary-light); font-weight: 300;
+            letter-spacing: 2px; border: 1px dashed var(--border-color); border-radius: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.1);
+        }
+        .game-result-box { margin-top: 15px; padding: 15px; background: rgba(144, 224, 239, 0.02); border: 1px solid var(--border-color); border-radius: 12px; font-size: 14px; line-height: 1.8; }
     </style>
 </head>
 <body>
@@ -43,135 +248,268 @@
 <div id="welcomeScreen">
     <div class="welcome-title">2026 CHRISTMAS</div>
     <div class="welcome-subtitle">PARTY CONTROLLER</div>
+    
+    <div class="tech-tree">
+        <div class="tree-star"></div>
+    </div>
+    
     <button class="enter-btn" onclick="enterApp()">LAUNCH SYSTEM</button>
 </div>
 
 <div class="app-container">
-    <header><h1>2026 CHRISTMAS PARTY</h1></header>
-    
+    <header>
+        <h1>2026 CHRISTMAS PARTY</h1>
+    </header>
+
     <div class="card">
         <div class="card-title">👥 派對成員名單</div>
         <div class="input-group">
-            <input type="text" id="memberInput" placeholder="輸入名字...">
+            <input type="text" id="memberInput" placeholder="輸入名字（如：小明）...">
             <button onclick="addMember()">新增</button>
         </div>
-        <div id="memberTagsContainer"></div>
+        <div class="member-tags" id="memberTagsContainer"></div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('accounting')">💰 記帳</button>
-        <button class="tab-btn" onclick="switchTab('games')">🎮 遊戲</button>
+        <button class="tab-btn active" onclick="switchTab('accounting')">💰 派對記帳</button>
+        <button class="tab-btn" onclick="switchTab('games')">🎮 聖誕遊戲</button>
     </div>
 
     <div id="accountingTab" class="tab-content active">
         <div class="card">
             <div class="card-title">💵 新增消費紀錄</div>
             <div class="input-group">
-                <input type="text" id="expenseDesc" placeholder="項目">
+                <input type="text" id="expenseDesc" placeholder="消費項目（如：烤雞）">
                 <input type="number" id="expenseAmount" placeholder="金額">
             </div>
-            <select id="payerSelect" style="width: 100%; margin-bottom: 10px;"></select>
+            <div style="margin-bottom: 8px; font-size: 13px; color: var(--text-muted);">誰付的錢：</div>
+            <select id="payerSelect" style="width: 100%; margin-bottom: 15px;"></select>
+            <div style="margin-bottom: 4px; font-size: 13px; color: var(--text-muted);">誰要平攤：</div>
             <div class="checkbox-grid" id="splitterCheckboxGrid"></div>
-            <button class="btn-block" onclick="addExpense()">儲存消費</button>
+            <button class="btn-block" onclick="addExpense()">儲存此筆消費</button>
         </div>
         <div class="card">
-            <div class="card-title"><span>📝 消費明細</span><button class="btn-danger" onclick="clearAllExpenses()">清空</button></div>
+            <div class="card-title">📝 消費明細</div>
             <div id="expenseListContainer"></div>
         </div>
         <div class="card">
-            <div class="card-title">✨ 結算路線</div>
+            <div class="card-title">✨ 最速還錢路線結算</div>
             <div id="settlementContainer"></div>
         </div>
     </div>
 
     <div id="gamesTab" class="tab-content">
         <div class="card">
-            <div class="card-title">🎲 抽籤</div>
+            <div class="card-title">🎲 科技感隨機抽籤</div>
             <div class="lucky-display" id="luckyDisplay">READY</div>
             <button class="btn-block" onclick="drawLuckyOne()">召喚幸運兒</button>
         </div>
         <div class="card">
-            <div class="card-title"><span>🎁 交換禮物</span><button class="btn-danger" onclick="clearGiftResult()">清除</button></div>
+            <div class="card-title">🎁 交換禮物精準配對</div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
+                系統內建防迴圈演算法，**每個人絕對不會抽到自己**！
+            </p>
             <button class="btn-block" onclick="matchGifts()">開始精準配對</button>
-            <div id="giftResultBox" style="display: none; margin-top: 15px; line-height: 1.8;"></div>
+            <div id="giftResultBox" class="game-result-box" style="display: none;"></div>
         </div>
     </div>
 </div>
 
 <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAHCELtsXy0EOM_PtCIhj1bviLCOAFK8dc",
-      authDomain: "christmas-party-d1644.firebaseapp.com",
-      projectId: "christmas-party-d1644",
-      storageBucket: "christmas-party-d1644.firebasestorage.app",
-      messagingSenderId: "109660417434",
-      appId: "1:109660417434:web:1e3ad17e8b77a9b8069e23",
-      measurementId: "G-GW6LVQLCSS"
-};
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    let members = [];
+    let expenses = [];
 
-    let members = [], expenses = [];
+    // 啟動主畫面解鎖進入
+    function enterApp() {
+        const welcome = document.getElementById('welcomeScreen');
+        welcome.classList.add('hide');
+    }
 
-    function enterApp() { document.getElementById('welcomeScreen').classList.add('hide'); }
-    function switchTab(tab) { /* 隱藏與顯示邏輯 */ }
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => { navigator.serviceWorker.register('service-worker.js'); });
+    }
 
-    db.ref('party_data').on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        members = data.members || [];
-        expenses = data.expenses || [];
-        updateMemberUI(); updateExpenseListUI(); calculateSplit();
-        if(data.lucky_one) document.getElementById('luckyDisplay').innerText = data.lucky_one;
-        if(data.gift_html) { document.getElementById('giftResultBox').style.display='block'; document.getElementById('giftResultBox').innerHTML=data.gift_html; }
-    });
-
-    function syncToCloud() { db.ref('party_data').update({ members, expenses }); }
-
-    function addMember() {
-    const input = document.getElementById('memberInput'); // 檢查這裡的 ID 是否為 memberInput
-    const name = input.value.trim();
-    function removeMember(name) { /* 略 */ }
-    
-    // --- 新增：刪除單筆帳目 ---
-    function deleteExpense(index) {
-        if(confirm('確定要刪除這筆消費嗎？')) {
-            expenses.splice(index, 1);
-            syncToCloud();
+    // 分頁切換
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        if (tabName === 'accounting') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('accountingTab').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('gamesTab').classList.add('active');
         }
     }
 
-    // --- 新增：帶密碼清除禮物 ---
-    function clearGiftResult() {
-        const password = prompt("請輸入管理員密碼以清除交換禮物結果：");
-        if (password === "9527") {
-            db.ref('party_data/gift_html').remove();
-            document.getElementById('giftResultBox').style.display = 'none';
-        } else if (password !== null) { alert("密碼錯誤！"); }
+    // 新增成員
+    function addMember() {
+        const input = document.getElementById('memberInput');
+        const name = input.value.trim();
+        if (!name) return;
+        if (members.includes(name)) { alert('名字重複囉！'); return; }
+        members.push(name);
+        input.value = '';
+        updateMemberUI();
+        calculateSplit();
     }
 
-    // --- 新增：更新清單 (包含刪除按鈕) ---
+    function removeMember(name) {
+        members = members.filter(m => m !== name);
+        expenses = expenses.filter(exp => exp.paidBy !== name);
+        expenses.forEach(exp => { exp.splitWith = exp.splitWith.filter(s => s !== name); });
+        expenses = expenses.filter(exp => exp.splitWith.length > 0);
+        updateMemberUI();
+        updateExpenseListUI();
+        calculateSplit();
+    }
+
+    function updateMemberUI() {
+        document.getElementById('memberTagsContainer').innerHTML = members.map(m => `
+            <div class="tag">${m} <span class="remove-btn" onclick="removeMember('${m}')">×</span></div>
+        `).join('');
+        const payerSelect = document.getElementById('payerSelect');
+        payerSelect.innerHTML = members.length === 0 ? '<option value="">-- 請先新增成員 --</option>' : members.map(m => `<option value="${m}">${m}</option>`).join('');
+        const checkboxGrid = document.getElementById('splitterCheckboxGrid');
+        checkboxGrid.innerHTML = members.length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">暫無成員</span>' : members.map(m => `
+            <label class="checkbox-label"><input type="checkbox" name="splitters" value="${m}" checked> ${m}</label>
+        `).join('');
+    }
+
+    function addExpense() {
+        const descInput = document.getElementById('expenseDesc');
+        const amountInput = document.getElementById('expenseAmount');
+        const paidBy = document.getElementById('payerSelect').value;
+        const desc = descInput.value.trim() || '未命名開銷';
+        const amount = parseFloat(amountInput.value);
+
+        if (!amount || amount <= 0) { alert('請輸入金額！'); return; }
+        if (!paidBy) { alert('請選擇付款人！'); return; }
+
+        const checkboxes = document.querySelectorAll('input[name="splitters"]:checked');
+        const splitWith = Array.from(checkboxes).map(cb => cb.value);
+        if (splitWith.length === 0) { alert('請勾選平攤人！'); return; }
+
+        expenses.push({ desc, amount, paidBy, splitWith });
+        descInput.value = ''; amountInput.value = '';
+        updateExpenseListUI();
+        calculateSplit();
+    }
+
     function updateExpenseListUI() {
         const container = document.getElementById('expenseListContainer');
-        if (expenses.length === 0) { container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">暫無紀錄</p>'; return; }
-        container.innerHTML = expenses.map((exp, index) => `
+        if (expenses.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 14px; padding: 10px 0;">暫無消費紀錄</p>';
+            return;
+        }
+        container.innerHTML = expenses.map(exp => `
             <div class="list-item">
                 <div class="item-detail">
                     <div>${exp.desc}</div>
-                    <div class="item-subtitle">由 ${exp.paidBy} 墊付</div>
+                    <div class="item-subtitle">由 ${exp.paidBy} 墊付 (${exp.splitWith.join(', ')})</div>
                 </div>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div class="amount-txt">$${exp.amount}</div>
-                    <button class="btn-danger" onclick="deleteExpense(${index})">x</button>
-                </div>
+                <div class="amount-txt">$${exp.amount}</div>
             </div>
         `).join('');
     }
 
-    function addExpense() { /* 略 */ }
-    function calculateSplit() { /* 略 */ }
-    function drawLuckyOne() { /* 略 */ }
-    function matchGifts() { /* 略 */ }
-    function clearAllExpenses() { if(confirm('確認清空？')) { expenses=[]; syncToCloud(); } }
+    function calculateSplit() {
+        const container = document.getElementById('settlementContainer');
+        if (members.length === 0 || expenses.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 14px; padding: 10px 0;">新增開銷後自動計算</p>';
+            return;
+        }
+
+        let balances = {};
+        members.forEach(m => balances[m] = 0);
+        expenses.forEach(exp => {
+            const avg = exp.amount / exp.splitWith.length;
+            balances[exp.paidBy] += exp.amount;
+            exp.splitWith.forEach(s => { balances[s] -= avg; });
+        });
+
+        let debtors = [], creditors = [];
+        for (let m in balances) {
+            if (balances[m] < -0.1) debtors.push({ name: m, amount: -balances[m] });
+            else if (balances[m] > 0.1) creditors.push({ name: m, amount: balances[m] });
+        }
+
+        let html = '', i = 0, j = 0;
+        while (i < debtors.length && j < creditors.length) {
+            let debtor = debtors[i], creditor = creditors[j];
+            let settleAmount = Math.min(debtor.amount, creditor.amount);
+            html += `
+                <div class="settle-route">
+                    <div><span>${debtor.name}</span><span style="color:var(--accent-blue);margin:0 8px;">➔</span><span>${creditor.name}</span></div>
+                    <div class="amount-txt">$${Math.round(settleAmount)}</div>
+                </div>
+            `;
+            debtor.amount -= settleAmount; creditor.amount -= settleAmount;
+            if (debtor.amount < 0.1) i++; if (creditor.amount < 0.1) j++;
+        }
+        container.innerHTML = html || '<p style="text-align: center; color: #4caf50; font-size: 14px; padding: 10px 0;">✓ 帳目完全平分！</p>';
+    }
+
+    function deleteExpense(index) {
+        if(confirm('確定要刪除這筆消費嗎？')) {
+            expenses.splice(index, 1); // 刪除陣列中對應的一筆
+            syncToCloud();
+        }
+    }
+
+    function drawLuckyOne() {
+        if (members.length === 0) { alert('成員名單裡面沒有人可以抽喔！'); return; }
+        const display = document.getElementById('luckyDisplay');
+        let counter = 0;
+        const interval = setInterval(() => {
+            const randomName = members[Math.floor(Math.random() * members.length)];
+            display.innerText = randomName;
+            counter++;
+            if (counter > 15) {
+                clearInterval(interval);
+                const luckyOne = members[Math.floor(Math.random() * members.length)];
+                display.innerText = `🎉 ${luckyOne} 🎉`;
+            }
+        }, 80);
+    }
+
+    function matchGifts() {
+        if (members.length < 2) { alert('至少需要 2 位成員才能進行交換禮物！'); return; }
+        const resultBox = document.getElementById('giftResultBox');
+        let giver = [...members], receiver = [...members], valid = false, attempts = 0;
+
+        while (!valid && attempts < 500) {
+            attempts++;
+            for (let i = receiver.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [receiver[i], receiver[j]] = [receiver[j], receiver[i]];
+            }
+            valid = true;
+            for (let i = 0; i < giver.length; i++) {
+                if (giver[i] === receiver[i]) { valid = false; break; }
+            }
+        }
+
+        resultBox.style.display = 'block';
+        let resultHtml = '<strong style="color:var(--primary-light);">🎁 交換禮物配對結果：</strong><br>';
+        for (let i = 0; i < giver.length; i++) {
+            resultHtml += `• <strong>${giver[i]}</strong> ➔ 抽中 <strong>${receiver[i]}</strong> 的禮物<br>`;
+        }
+        resultBox.innerHTML = resultHtml;
+    }
+
+    function clearGiftResult() {
+        const password = prompt("請輸入管理員密碼以清除交換禮物結果：");
+        if (password === "9527") {
+            db.ref('party_data/gift_html').remove();
+            alert("已清除！");
+        } else if (password !== null) {
+            alert("想搞?");
+        }
+    }
+
+    updateMemberUI(); updateExpenseListUI(); calculateSplit();
 </script>
 </body>
 </html>
