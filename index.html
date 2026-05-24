@@ -7,32 +7,57 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         
-        /* 整個網頁的背景，並讓內容置中 */
+        /* 網頁背景與垂直水平置中 */
         body { background-color: #0b132b; color: #edf2f4; height: 100vh; display: flex; justify-content: center; }
         
-        /* 模擬手機 App 的外框 */
+        /* 手機板型極限外框 */
         .app-wrapper { width: 100%; max-width: 500px; position: relative; height: 100%; overflow: hidden; }
 
-        /* 迎賓畫面 */
+        /* 迎賓系統畫面 */
         #welcomeScreen { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b132b; z-index: 100; }
         
-        /* 主功能區 */
+        /* 主程式容器 */
         #appContainer { display: none; flex-direction: column; width: 100%; height: 100%; padding: 20px; overflow-y: auto; }
         
-        /* 分頁內容 */
+        /* 分頁切換 */
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
         
-        /* 頂部導航列 */
+        /* 上方切換頁按鈕 */
         .nav-btns { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; }
-        .nav-btns button { flex: 1; padding: 12px; background: #1c2541; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        .welcome-btn { padding: 15px 30px; background: transparent; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 30px; cursor: pointer; margin-top: 20px; }
+        .nav-btns button { flex: 1; padding: 12px; background: #1c2541; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .nav-btns button.active { background: #90e0ef; color: #0b132b; }
+        
+        .welcome-btn { padding: 15px 30px; background: transparent; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 30px; cursor: pointer; margin-top: 20px; font-size: 16px; letter-spacing: 2px; }
 
-        /* === 你的卡片與表單 UI 樣式 === */
-        .card { background-color: #1c2541; border: 1px solid #3a506b; border-radius: 16px; padding: 20px; margin-bottom: 20px; width: 100%;}
-        input, select { width: 100%; padding: 10px; margin: 5px 0; background: #0b132b; border: 1px solid #3a506b; color: white; border-radius: 8px; box-sizing: border-box;}
-        .action-btn { width: 100%; padding: 10px; background: transparent; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-        .tag { display: inline-block; background: #3a506b; padding: 5px 10px; border-radius: 20px; margin: 5px; font-size: 14px; }
+        /* 卡片設計 */
+        .card { background-color: #1c2541; border: 1px solid #3a506b; border-radius: 16px; padding: 20px; margin-bottom: 20px; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .card h3 { margin-bottom: 12px; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        
+        /* 表單元件 */
+        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; margin: 6px 0; background: #0b132b; border: 1px solid #3a506b; color: white; border-radius: 8px; font-size: 15px; }
+        .action-btn { width: 100%; padding: 12px; background: #90e0ef; border: none; color: #0b132b; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; font-size: 15px; }
+        .action-btn.secondary { background: transparent; border: 1px solid #ff0054; color: #ff0054; }
+
+        /* 成員標籤 */
+        .tag-container { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { display: inline-block; background: #3a506b; padding: 6px 12px; border-radius: 20px; font-size: 14px; }
+        
+        /* 多人平攤勾選區 */
+        .checkbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; background: #0b132b; padding: 10px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        
+        /* 列表項目明細 */
+        .list-container { margin-top: 10px; }
+        .list-item { background: #0b132b; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #90e0ef; }
+        .list-item-info { font-size: 14px; line-height: 1.4; }
+        .delete-btn { background: #ff0054; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+
+        /* 結算報告格式 */
+        .settle-item { padding: 8px 0; border-bottom: 1px dashed #3a506b; font-size: 15px; }
+        
+        /* 遊戲專用樣式 */
+        .game-status { text-align: center; font-size: 22px; font-weight: bold; margin: 20px 0; color: #90e0ef; min-height: 30px; }
     </style>
 </head>
 <body>
@@ -47,30 +72,61 @@
 
         <div id="appContainer">
             <div class="nav-btns">
-                <button onclick="switchTab('accounting')">💰 記帳</button>
-                <button onclick="switchTab('games')">🎮 遊戲</button>
+                <button id="nav-accounting" class="active" onclick="switchTab('accounting')">💰 派對記帳</button>
+                <button id="nav-games" onclick="switchTab('games')">🎮 聖誕遊戲</button>
             </div>
 
             <div id="accountingTab" class="tab-content active">
-                <h2 style="margin-bottom: 20px;">派對記帳區</h2>
                 
                 <div class="card">
                     <h3>👥 派對成員名單</h3>
-                    <input type="text" id="memberInput" placeholder="輸入名字...">
-                    <button class="action-btn" onclick="addMember()">新增成員</button>
-                    <div id="memberTagsContainer"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="memberInput" placeholder="輸入名字 (如：凱文)..." style="margin: 0;">
+                        <button onclick="addMember()" style="padding: 0 15px; background: #90e0ef; border: none; color: #0b132b; font-weight: bold; border-radius: 8px; cursor: pointer;">新增</button>
+                    </div>
+                    <div id="memberTagsContainer" class="tag-container"></div>
                 </div>
 
                 <div class="card">
-                    <h3>💵 選擇付款人</h3>
+                    <h3>📝 新增消費紀錄</h3>
+                    <input type="text" id="expensePurpose" placeholder="消費項目 (如：好市多披薩)">
+                    <input type="number" id="expenseAmount" placeholder="金額">
+                    
+                    <label style="font-size: 14px; color: #90e0ef; margin-top: 6px; display: block;">誰付的錢：</label>
                     <select id="payerSelect"></select>
+                    
+                    <label style="font-size: 14px; color: #90e0ef; margin-top: 6px; display: block;">誰要平攤：</label>
+                    <div id="splitWithContainer" class="checkbox-grid"></div>
+
+                    <button class="action-btn" onclick="addExpense()">儲存此筆消費</button>
+                </div>
+
+                <div class="card">
+                    <h3>🧾 消費明細</h3>
+                    <div id="expenseListContainer" class="list-container"></div>
+                </div>
+
+                <div class="card">
+                    <h3>✨ 最速捷轉帳結算</h3>
+                    <div id="settlementContainer"></div>
                 </div>
 
             </div>
 
             <div id="gamesTab" class="tab-content">
-                <h2 style="margin-bottom: 20px;">交換禮物區</h2>
-                <p>之後抽獎功能會放這裡...</p>
+                <div class="card">
+                    <h3>💣 終極密碼 (多人同步版)</h3>
+                    <p style="font-size: 14px; color: #5c677d; text-align: center;">所有連線手機將會同步更動密碼範圍！</p>
+                    
+                    <div id="gameMsg" class="game-status">載入中...</div>
+                    
+                    <div id="gameControls">
+                        <input type="number" id="guessInput" placeholder="請輸入你的猜測數字">
+                        <button class="action-btn" onclick="submitGuess()">送出猜測</button>
+                    </div>
+                    
+                    <button id="resetGameBtn" class="action-btn secondary" onclick="resetGame()" style="display: none; margin-top: 15px;">重新開始新遊戲</button>
+                </div>
             </div>
         </div>
 
@@ -80,7 +136,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
     <script>
-        // === 1. 畫面切換邏輯 ===
+        // === [1] 基礎畫面路由切換 ===
         function enterApp() {
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
@@ -88,10 +144,13 @@
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btns button').forEach(b => b.classList.remove('active'));
+            
             document.getElementById(tabName + 'Tab').classList.add('active');
+            document.getElementById('nav-' + tabName).classList.add('active');
         }
 
-        // === 2. Firebase 初始化 ===
+        // === [2] Firebase 設定與初始化 ===
         const firebaseConfig = {
             apiKey: "AIzaSyAHCELtsXy0EOM_PtCIhj1bviLCOAFK8dc",
             authDomain: "christmas-party-d1644.firebaseapp.com",
@@ -103,40 +162,276 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let members = [];
 
-        // === 3. 更新介面函式 ===
+        // 全域變數快取資料庫狀態
+        let members = [];
+        let expenses = {};
+
+        // === [3] 成員功能邏輯 ===
+        function addMember() {
+            const input = document.getElementById('memberInput');
+            const name = input.value.trim();
+            if (name) {
+                if (members.includes(name)) {
+                    alert("名字重複囉！");
+                    return;
+                }
+                let updated = [...members, name];
+                db.ref('party_data/members').set(updated).then(() => { input.value = ''; });
+            }
+        }
+
         function updateMemberUI() {
-            const container = document.getElementById('memberTagsContainer');
-            const select = document.getElementById('payerSelect');
-            container.innerHTML = '';
-            select.innerHTML = '<option value="">選擇付款人</option>';
-            
-            members.forEach(name => {
-                container.innerHTML += `<div class="tag">${name}</div>`;
-                select.innerHTML += `<option value="${name}">${name}</option>`;
+            // 更新成員標籤
+            const tagsContainer = document.getElementById('memberTagsContainer');
+            tagsContainer.innerHTML = members.length ? '' : '<span style="color:#5c677d; font-size:14px;">暫無成員，請從上方新增</span>';
+            members.forEach(m => {
+                tagsContainer.innerHTML += `<span class="tag">${m}</span>`;
+            });
+
+            // 更新付款人下拉選單
+            const payerSelect = document.getElementById('payerSelect');
+            payerSelect.innerHTML = '<option value="">-- 請選擇付款人 --</option>';
+            members.forEach(m => {
+                payerSelect.innerHTML += `<option value="${m}">${m}</option>`;
+            });
+
+            // 更新分攤人核取方塊 (預設勾選全選)
+            const splitContainer = document.getElementById('splitWithContainer');
+            splitContainer.innerHTML = '';
+            members.forEach(m => {
+                splitContainer.innerHTML += `
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="splitMember" value="${m}" checked> ${m}
+                    </label>
+                `;
             });
         }
 
-        // === 4. 新增成員函式 ===
-        window.addMember = function() {
-            const input = document.getElementById('memberInput');
-            if (input.value) {
-                let newMembers = [...members]; 
-                newMembers.push(input.value);
-                
-                db.ref('party_data/members').set(newMembers)
-                    .then(() => { input.value = ''; })
-                    .catch(error => { console.error("寫入失敗:", error); });
-            }
-        };
+        // === [4] 記帳核心功能 ===
+        function addExpense() {
+            const purpose = document.getElementById('expensePurpose').value.trim();
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const payer = document.getElementById('payerSelect').value;
+            
+            // 抓取被勾選要平攤的人
+            const checkedBoxes = document.querySelectorAll('input[name="splitMember"]:checked');
+            let splitWith = [];
+            checkedBoxes.forEach(cb => splitWith.push(cb.value));
 
-        // === 5. 監聽雲端資料變化 ===
+            if (!purpose || isNaN(amount) || amount <= 0 || !payer || splitWith.length === 0) {
+                alert("請填寫完整的消費項目、金額、付款人，並至少勾選一位分攤人！");
+                return;
+            }
+
+            const newExpenseData = {
+                purpose: purpose,
+                amount: amount,
+                payer: payer,
+                splitWith: splitWith,
+                timestamp: Date.now()
+            };
+
+            db.ref('party_data/expenses').push(newExpenseData).then(() => {
+                document.getElementById('expensePurpose').value = '';
+                document.getElementById('expenseAmount').value = '';
+                alert("消費記錄已同步上傳！");
+            });
+        }
+
+        function deleteExpense(key) {
+            if (confirm("確定要刪除這筆消費紀錄嗎？")) {
+                db.ref(`party_data/expenses/${key}`).remove();
+            }
+        }
+
+        function updateExpenseAndSettlementUI() {
+            const listContainer = document.getElementById('expenseListContainer');
+            listContainer.innerHTML = '';
+            
+            let hasData = false;
+            for (let key in expenses) {
+                hasData = true;
+                let exp = expenses[key];
+                listContainer.innerHTML += `
+                    <div class="list-item">
+                        <div class="list-item-info">
+                            <b>${exp.purpose}</b><br>
+                            <span style="color:#90e0ef">$${exp.amount}</span> 元 ── 由 <b>${exp.payer}</b> 支付<br>
+                            <span style="color:#5c677d; font-size:12px;">分攤：${exp.splitWith.join(', ')}</span>
+                        </div>
+                        <button class="delete-btn" onclick="deleteExpense('${key}')">❌ 刪除</button>
+                    </div>
+                `;
+            }
+            if (!hasData) {
+                listContainer.innerHTML = '<div style="color:#5c677d; font-size:14px; text-align:center; padding:10px;">目前尚無消費明細</div>';
+            }
+
+            // 執行最速轉帳演算法
+            runSettlementAlgorithm();
+        }
+
+        // === [5] 金流清算演算法 (Greedy Settlement Algorithm) ===
+        function runSettlementAlgorithm() {
+            const container = document.getElementById('settlementContainer');
+            container.innerHTML = '';
+
+            if (members.length === 0) {
+                container.innerHTML = '<span style="color:#5c677d; font-size:14px;">請先建立成員名單</span>';
+                return;
+            }
+
+            // 初始化每個人的淨額 (正代表應拿回錢，負代表應付錢)
+            let balances = {};
+            members.forEach(m => balances[m] = 0);
+
+            // 累加所有消費計算出每個人最終的 Balance
+            for (let key in expenses) {
+                let exp = expenses[key];
+                let amt = parseFloat(exp.amount) || 0;
+                let payer = exp.payer;
+                let splitters = exp.splitWith || [];
+
+                if (balances[payer] !== undefined) balances[payer] += amt; // 付款人獲得應收回抵免
+                
+                let perPersonShare = amt / splitters.length;
+                splitters.forEach(p => {
+                    if (balances[p] !== undefined) balances[p] -= perPersonShare; // 參與平攤者扣除其份額
+                });
+            }
+
+            // 將人拆分成債務人(欠錢)與債權人(收錢)
+            let debtors = [];
+            let creditors = [];
+            for (let m in balances) {
+                let bal = balances[m];
+                if (bal < -0.01) {
+                    debtors.push({ name: m, amount: -bal });
+                } else if (bal > 0.01) {
+                    creditors.push({ name: m, amount: bal });
+                }
+            }
+
+            // 大額優先配對結算
+            debtors.sort((a, b) => b.amount - a.amount);
+            creditors.sort((a, b) => b.amount - a.amount);
+
+            let instructions = [];
+            let i = 0, j = 0;
+
+            while (i < debtors.length && j < creditors.length) {
+                let d = debtors[i];
+                let c = creditors[j];
+                let transfer = Math.min(d.amount, c.amount);
+
+                if (transfer > 0.1) {
+                    instructions.push(`🔹 <b>${d.name}</b> 應轉帳給 <b>${c.name}</b> <span style="color:#70e000; font-weight:bold;">$${Math.round(transfer)}</span> 元`);
+                }
+
+                d.amount -= transfer;
+                c.amount -= transfer;
+
+                if (d.amount <= 0.1) i++;
+                if (c.amount <= 0.1) j++;
+            }
+
+            if (instructions.length === 0) {
+                container.innerHTML = '<div style="color:#70e000; font-size:14px; text-align:center;">帳目完全平衡！目前誰也不欠誰 👍</div>';
+            } else {
+                instructions.forEach(ins => {
+                    container.innerHTML += `<div class="settle-item">${ins}</div>`;
+                });
+            }
+        }
+
+        // === [6] 遊戲模組：雲端連線終極密碼 ===
+        function initGameSync() {
+            db.ref('party_data/game').on('value', (snapshot) => {
+                const game = snapshot.val();
+                const msgDiv = document.getElementById('gameMsg');
+                const controls = document.getElementById('gameControls');
+                const resetBtn = document.getElementById('resetGameBtn');
+
+                if (!game) {
+                    // 若資料庫內無遊戲狀態則自動初始化
+                    resetGame();
+                    return;
+                }
+
+                if (game.gameOver) {
+                    msgDiv.innerHTML = `<span style="color:#ff0054;">${game.msg}</span>`;
+                    controls.style.display = 'none';
+                    resetBtn.style.display = 'block';
+                } else {
+                    msgDiv.innerHTML = `${game.min} ~ ${game.max}`;
+                    controls.style.display = 'block';
+                    resetBtn.style.display = 'none';
+                }
+            });
+        }
+
+        function resetGame() {
+            let answerRandom = Math.floor(Math.random() * 100) + 1;
+            db.ref('party_data/game').set({
+                answer: answerRandom,
+                min: 1,
+                max: 100,
+                gameOver: false,
+                msg: "1 ~ 100"
+            });
+            document.getElementById('guessInput').value = '';
+        }
+
+        function submitGuess() {
+            const input = document.getElementById('guessInput');
+            const guess = parseInt(input.value);
+            
+            if (isNaN(guess) || !guess) {
+                alert("請輸入有效的數字！");
+                return;
+            }
+
+            db.ref('party_data/game').once('value', (snapshot) => {
+                let game = snapshot.val();
+                if (!game || game.gameOver) return;
+
+                if (guess <= game.min || guess >= game.max) {
+                    alert(`傻瓜，請猜有效範圍內 (${game.min} ~ ${game.max}) 的數字！`);
+                    return;
+                }
+
+                if (guess === game.answer) {
+                    game.gameOver = true;
+                    game.msg = `🎉 💥 爆炸了！！密碼就是【 ${game.answer} 】`;
+                } else if (guess < game.answer) {
+                    game.min = Math.max(game.min, guess);
+                } else {
+                    game.max = Math.min(game.max, guess);
+                }
+
+                db.ref('party_data/game').set(game).then(() => {
+                    input.value = '';
+                });
+            });
+        }
+
+        // === [7] 資料即時監聽與初始化掛載 ===
+        // 監聽成員
         db.ref('party_data/members').on('value', (snapshot) => {
-            const data = snapshot.val();
-            members = data || [];
+            members = snapshot.val() || [];
             updateMemberUI();
+            runSettlementAlgorithm(); 
         });
+
+        // 監聽消費項目
+        db.ref('party_data/expenses').on('value', (snapshot) => {
+            expenses = snapshot.val() || {};
+            updateExpenseAndSettlementUI();
+        });
+
+        // 初始化終極密碼
+        initGameSync();
     </script>
 </body>
 </html>
