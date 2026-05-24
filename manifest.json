@@ -1,14 +1,14 @@
 {
-  "name": "2026 Christmas party",
-  "short_name": "2026 Christmas party",
+  "name": "2026聖誕派對",
+  "short_name": "2026聖誕派對",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#fcfbfa",
-  "theme_color": "#fcfbfa",
+  "background-color": "#0b132b",
+  "theme_color": "#0b132b",
   "icons": [
     {
       "src": "icon.png",
-      "sizes": "192x192",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
