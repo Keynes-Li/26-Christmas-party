@@ -127,7 +127,9 @@
 
     function syncToCloud() { db.ref('party_data').update({ members, expenses }); }
 
-    function addMember() { /* 略 */ }
+    function addMember() {
+    const input = document.getElementById('memberInput'); // 檢查這裡的 ID 是否為 memberInput
+    const name = input.value.trim();
     function removeMember(name) { /* 略 */ }
     
     // --- 新增：刪除單筆帳目 ---
