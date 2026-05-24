@@ -4,33 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2026 Christmas Party</title>
-    <link rel="manifest" href="manifest.json">
     <style>
         :root {
             --bg-color: #0b132b; --card-bg: #1c2541; --primary-light: #90e0ef;
             --accent-blue: #00b4d8; --text-main: #edf2f4; --text-muted: #a2d2ff; --border-color: #3a506b;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; overflow-x: hidden; }
-        .app-container { width: 100%; max-width: 500px; padding: 20px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 40px; }
-
-        /* 主畫面 */
-        #welcomeScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        #welcomeScreen.hide { opacity: 0; transform: translateY(-100%); pointer-events: none; }
-        .welcome-title { font-size: 28px; font-weight: 300; letter-spacing: 4px; color: var(--primary-light); margin-bottom: 50px; }
-        .enter-btn { background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 14px 40px; border-radius: 30px; font-size: 15px; cursor: pointer; }
-
-        /* 卡片與內容 */
-        header { text-align: center; padding: 20px 0; border-bottom: 1px solid var(--border-color); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; padding: 20px; }
+        .app-container { width: 100%; max-width: 500px; }
         .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
-        .card-title { display: flex; justify-content: space-between; align-items: center; color: var(--primary-light); margin-bottom: 15px; font-size: 16px; }
-        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input, select { flex: 1; min-width: 0; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: white; }
-        button { background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 8px 15px; border-radius: 8px; cursor: pointer; }
-        .btn-block { width: 100%; margin-top: 10px; padding: 12px; }
-        .btn-danger { border-color: #ef233c; color: #ef233c; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(58, 80, 107, 0.3); }
-        .amount-txt { color: var(--primary-light); font-weight: bold; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; background: rgba(28, 37, 65, 0.5); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; cursor: pointer; }
+        .tab-btn.active { border-color: var(--primary-light); color: var(--primary-light); background: rgba(144, 224, 239, 0.1); }
+        .tab-content { display: none; flex-direction: column; gap: 20px; }
+        .tab-content.active { display: flex; }
+        .btn-block { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        .btn-danger { color: #ef233c; border-color: #ef233c; padding: 4px 8px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
         .cloud-status { text-align: center; font-size: 11px; color: #4caf50; margin-bottom: 10px; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -38,112 +28,109 @@
 </head>
 <body>
 
-<div id="welcomeScreen">
-    <div class="welcome-title">2026 CHRISTMAS PARTY</div>
-    <button class="enter-btn" onclick="document.getElementById('welcomeScreen').classList.add('hide')">進入系統</button>
-</div>
-
 <div class="app-container">
-    <header><h1>2026 CHRISTMAS</h1></header>
+    <header style="text-align:center; padding:20px;"><h1>2026 CHRISTMAS</h1></header>
     <div class="cloud-status">⚡ 雲端即時連線中</div>
 
-    <div class="card">
-        <div class="card-title">👥 成員名單</div>
-        <div class="input-group">
-            <input type="text" id="memberInput" placeholder="輸入名字...">
-            <button onclick="addMember()">新增</button>
-        </div>
-        <div id="memberTagsContainer"></div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(this, 'accounting')">💰 派對記帳</button>
+        <button class="tab-btn" onclick="switchTab(this, 'games')">🎮 聖誕遊戲</button>
     </div>
 
-    <div class="card">
-        <div class="card-title">💵 新增消費</div>
-        <input type="text" id="expenseDesc" placeholder="項目" style="width:100%; margin-bottom:5px;">
-        <div class="input-group">
-            <input type="number" id="expenseAmount" placeholder="金額">
-            <select id="payerSelect"></select>
+    <div id="accounting" class="tab-content active">
+        <div class="card">
+            <div style="color:var(--primary-light); margin-bottom:10px;">💵 新增消費</div>
+            <input type="text" id="expenseDesc" placeholder="項目" style="width:100%; padding:10px; margin-bottom:5px; background:rgba(0,0,0,0.2); border:1px solid var(--border-color); color:white;">
+            <div style="display:flex; gap:5px;">
+                <input type="number" id="expenseAmount" placeholder="金額" style="flex:1; padding:10px; background:rgba(0,0,0,0.2); border:1px solid var(--border-color); color:white;">
+                <select id="payerSelect" style="flex:1; background:rgba(0,0,0,0.2); border:1px solid var(--border-color); color:white;"></select>
+            </div>
+            <button class="btn-block" onclick="addExpense()">儲存消費</button>
         </div>
-        <button class="btn-block" onclick="addExpense()">儲存消費</button>
+        <div class="card">
+            <div style="color:var(--primary-light); margin-bottom:10px;">📝 消費明細</div>
+            <div id="expenseListContainer"></div>
+        </div>
     </div>
 
-    <div class="card">
-        <div class="card-title">📝 消費明細</div>
-        <div id="expenseListContainer"></div>
-    </div>
-
-    <div class="card">
-        <div class="card-title">🎁 交換禮物
-            <button class="btn-danger" onclick="clearGiftResult()">清除</button>
+    <div id="games" class="tab-content">
+        <div class="card">
+            <div style="color:var(--primary-light); margin-bottom:10px;">🎁 交換禮物
+                <button class="btn-danger" onclick="clearGiftResult()" style="float:right;">清除</button>
+            </div>
+            <button class="btn-block" onclick="matchGifts()">開始配對</button>
+            <div id="giftResultBox" style="margin-top:15px; display:none; color:var(--text-main);"></div>
         </div>
-        <button class="btn-block" onclick="matchGifts()">開始配對</button>
-        <div id="giftResultBox" style="margin-top:15px; display:none;"></div>
     </div>
 </div>
 
 <script>
+    // ⚙️ 請務必將下方的設定換成你 Firebase 的實際數據
     const firebaseConfig = {
-      apiKey: "AIzaSyAHCELtsXy0EOM_PtCIhj1bviLCOAFK8dc",
-      authDomain: "christmas-party-d1644.firebaseapp.com",
-      projectId: "christmas-party-d1644",
-      storageBucket: "christmas-party-d1644.firebasestorage.app",
-      messagingSenderId: "109660417434",
-      appId: "1:109660417434:web:1e3ad17e8b77a9b8069e23",
-      measurementId: "G-GW6LVQLCSS"
-};
-;
+        apiKey: "YOUR_API_KEY",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let members = [], expenses = [];
 
+    // 初始化監聽
     db.ref('party_data').on('value', (snapshot) => {
         const data = snapshot.val() || {};
         members = data.members || [];
         expenses = data.expenses || [];
         updateUI();
+        const giftBox = document.getElementById('giftResultBox');
         if(data.gift_html) {
-            document.getElementById('giftResultBox').style.display = 'block';
-            document.getElementById('giftResultBox').innerHTML = data.gift_html;
+            giftBox.style.display = 'block';
+            giftBox.innerHTML = data.gift_html;
         } else {
-            document.getElementById('giftResultBox').style.display = 'none';
+            giftBox.style.display = 'none';
         }
     });
 
-    function sync() { db.ref('party_data').set({ members, expenses }); }
-
-    function addMember() {
-        const name = document.getElementById('memberInput').value.trim();
-        if(name && !members.includes(name)) { members.push(name); document.getElementById('memberInput').value=''; sync(); }
+    // 切換分頁邏輯
+    function switchTab(btn, tabId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
     }
+
+    function sync() { db.ref('party_data').set({ members, expenses }); }
 
     function addExpense() {
         const desc = document.getElementById('expenseDesc').value;
         const amount = document.getElementById('expenseAmount').value;
         const paidBy = document.getElementById('payerSelect').value;
-        if(desc && amount && paidBy) { expenses.push({desc, amount, paidBy}); sync(); }
+        if(desc && amount) { 
+            expenses.push({desc, amount, paidBy}); 
+            sync(); 
+        }
     }
 
     function deleteExpense(index) { expenses.splice(index, 1); sync(); }
 
     function updateUI() {
-        document.getElementById('memberTagsContainer').innerHTML = members.map(m => `<span style="padding:5px; margin:2px; background:#3a506b; border-radius:10px;">${m}</span>`).join(' ');
         document.getElementById('payerSelect').innerHTML = members.map(m => `<option>${m}</option>`).join('');
         document.getElementById('expenseListContainer').innerHTML = expenses.map((e, i) => `
             <div class="list-item">
                 <div>${e.desc} (${e.paidBy})</div>
-                <div><span class="amount-txt">$${e.amount}</span> <button class="btn-danger" onclick="deleteExpense(${i})">x</button></div>
+                <div>$${e.amount} <button class="btn-danger" onclick="deleteExpense(${i})">x</button></div>
             </div>
         `).join('');
     }
 
     function matchGifts() {
         let r = [...members].sort(() => Math.random() - 0.5);
-        let h = members.map((m, i) => `• ${m} 抽中 ${r[i]}`).join('<br>');
+        let h = members.map((m, i) => `• ${m} ➔ ${r[i]}`).join('<br>');
         db.ref('party_data/gift_html').set(h);
     }
 
     function clearGiftResult() {
-        if(prompt("輸入管理員密碼 (9527)：") === "9527") db.ref('party_data/gift_html').remove();
+        if(prompt("請輸入密碼 (9527)：") === "9527") db.ref('party_data/gift_html').remove();
     }
 </script>
 </body>
