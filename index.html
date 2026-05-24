@@ -58,7 +58,7 @@
         .settle-item { padding: 8px 0; border-bottom: 1px dashed #3a506b; font-size: 15px; }
         
         /* 遊戲專用樣式 */
-        .game-status { text-align: center; font-size: 22px; font-weight: bold; margin: 20px 0; color: #90e0ef; min-height: 30px; }
+        .game-status { text-align: center; font-size: 22px; font-weight: bold; margin: 20px 0; color: #90e0ef; min-height: 30px; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -82,7 +82,7 @@
                 <div class="card">
                     <h3>👥 派對成員名單</h3>
                     <div style="display: flex; gap: 8px; align-items: stretch;">
-                        <input type="text" id="memberInput" placeholder="輸入名字 (如：醉漢)..." style="margin: 0; flex: 1;">
+                        <input type="text" id="memberInput" placeholder="輸入名字 (如：凱文)..." style="margin: 0; flex: 1;">
                         <button onclick="addMember()" style="padding: 0 20px; background: #90e0ef; border: none; color: #0b132b; font-weight: bold; border-radius: 8px; cursor: pointer; white-space: nowrap;">新增</button>
                     </div>
                     <div id="memberTagsContainer" class="tag-container"></div>
@@ -90,7 +90,7 @@
 
                 <div class="card">
                     <h3>📝 新增消費紀錄</h3>
-                    <input type="text" id="expensePurpose" placeholder="消費項目 (如：戰鬥陀螺)">
+                    <input type="text" id="expensePurpose" placeholder="消費項目 (如：好市多披薩)">
                     <input type="number" id="expenseAmount" placeholder="金額">
                     
                     <label style="font-size: 14px; color: #90e0ef; margin-top: 6px; display: block;">誰付的錢：</label>
@@ -116,12 +116,16 @@
 
             <div id="gamesTab" class="tab-content">
                 <div class="card">
-                    <h3>💣 終極密碼</h3>
+                    <h3>💣 終極密碼 (多人同步版)</h3>
                     <p style="font-size: 14px; color: #5c677d; text-align: center;">所有連線手機將會同步更動密碼範圍！</p>
                     
                     <div id="gameMsg" class="game-status">載入中...</div>
                     
                     <div id="gameControls">
+                        <select id="gamePlayerSelect" style="margin-bottom: 10px;">
+                            <option value="">-- 送出前，請先選擇你是誰 --</option>
+                        </select>
+
                         <input type="number" id="guessInput" placeholder="請輸入你的猜測數字">
                         <button class="action-btn" onclick="submitGuess()">送出猜測</button>
                     </div>
@@ -182,7 +186,6 @@
             }
         }
 
-        // 刪除成員功能
         function removeMember(name) {
             if (confirm(`確定要移除成員「${name}」嗎？`)) {
                 let updated = members.filter(m => m !== name);
@@ -191,21 +194,21 @@
         }
 
         function updateMemberUI() {
-            // 更新成員標籤 (加入刪除按鈕)
+            // 1. 更新成員標籤
             const tagsContainer = document.getElementById('memberTagsContainer');
             tagsContainer.innerHTML = members.length ? '' : '<span style="color:#5c677d; font-size:14px; margin-top:8px;">暫無成員，請從上方新增</span>';
             members.forEach(m => {
                 tagsContainer.innerHTML += `<span class="tag">${m} <span class="tag-delete" onclick="removeMember('${m}')">✖</span></span>`;
             });
 
-            // 更新付款人下拉選單
+            // 2. 更新付款人下拉選單
             const payerSelect = document.getElementById('payerSelect');
             payerSelect.innerHTML = '<option value="">-- 請選擇付款人 --</option>';
             members.forEach(m => {
                 payerSelect.innerHTML += `<option value="${m}">${m}</option>`;
             });
 
-            // 更新分攤人核取方塊 (預設勾選全選)
+            // 3. 更新分攤人核取方塊
             const splitContainer = document.getElementById('splitWithContainer');
             splitContainer.innerHTML = '';
             members.forEach(m => {
@@ -215,6 +218,19 @@
                     </label>
                 `;
             });
+
+            // 4. 更新遊戲區的玩家選擇器
+            const gamePlayerSelect = document.getElementById('gamePlayerSelect');
+            if(gamePlayerSelect) {
+                let currentVal = gamePlayerSelect.value;
+                gamePlayerSelect.innerHTML = '<option value="">-- 送出前，請先選擇你是誰 --</option>';
+                members.forEach(m => {
+                    gamePlayerSelect.innerHTML += `<option value="${m}">${m}</option>`;
+                });
+                if(members.includes(currentVal)) {
+                    gamePlayerSelect.value = currentVal; // 記住使用者當前的選擇
+                }
+            }
         }
 
         // === [4] 記帳核心功能 ===
@@ -223,7 +239,6 @@
             const amount = parseFloat(document.getElementById('expenseAmount').value);
             const payer = document.getElementById('payerSelect').value;
             
-            // 抓取被勾選要平攤的人
             const checkedBoxes = document.querySelectorAll('input[name="splitMember"]:checked');
             let splitWith = [];
             checkedBoxes.forEach(cb => splitWith.push(cb.value));
@@ -277,11 +292,10 @@
                 listContainer.innerHTML = '<div style="color:#5c677d; font-size:14px; text-align:center; padding:10px;">目前尚無消費明細</div>';
             }
 
-            // 執行最速轉帳演算法
             runSettlementAlgorithm();
         }
 
-        // === [5] 金流清算演算法 (Greedy Settlement Algorithm) ===
+        // === [5] 金流清算演算法 ===
         function runSettlementAlgorithm() {
             const container = document.getElementById('settlementContainer');
             container.innerHTML = '';
@@ -291,26 +305,23 @@
                 return;
             }
 
-            // 初始化每個人的淨額 (正代表應拿回錢，負代表應付錢)
             let balances = {};
             members.forEach(m => balances[m] = 0);
 
-            // 累加所有消費計算出每個人最終的 Balance
             for (let key in expenses) {
                 let exp = expenses[key];
                 let amt = parseFloat(exp.amount) || 0;
                 let payer = exp.payer;
                 let splitters = exp.splitWith || [];
 
-                if (balances[payer] !== undefined) balances[payer] += amt; // 付款人獲得應收回抵免
+                if (balances[payer] !== undefined) balances[payer] += amt;
                 
                 let perPersonShare = amt / splitters.length;
                 splitters.forEach(p => {
-                    if (balances[p] !== undefined) balances[p] -= perPersonShare; // 參與平攤者扣除其份額
+                    if (balances[p] !== undefined) balances[p] -= perPersonShare;
                 });
             }
 
-            // 將人拆分成債務人(欠錢)與債權人(收錢)
             let debtors = [];
             let creditors = [];
             for (let m in balances) {
@@ -322,7 +333,6 @@
                 }
             }
 
-            // 大額優先配對結算
             debtors.sort((a, b) => b.amount - a.amount);
             creditors.sort((a, b) => b.amount - a.amount);
 
@@ -335,7 +345,7 @@
                 let transfer = Math.min(d.amount, c.amount);
 
                 if (transfer > 0.1) {
-                    instructions.push(`🔹 <b>${d.name}</b> 應轉帳給 <b>${c.name}</b> <span style="color:#70e000; font-weight:bold;">$${Math.round(transfer)}</span> 元`);
+                    instructions.push(`🔹 <b>${d.name}</b> 應轉給 <b>${c.name}</b> <span style="color:#70e000; font-weight:bold;">$${Math.round(transfer)}</span> 元`);
                 }
 
                 d.amount -= transfer;
@@ -363,7 +373,6 @@
                 const resetBtn = document.getElementById('resetGameBtn');
 
                 if (!game) {
-                    // 若資料庫內無遊戲狀態則自動初始化
                     resetGame();
                     return;
                 }
@@ -393,6 +402,15 @@
         }
 
         function submitGuess() {
+            // 確認是誰在玩
+            const playerSelect = document.getElementById('gamePlayerSelect');
+            const playerName = playerSelect ? playerSelect.value : "";
+            
+            if (!playerName) {
+                alert("請先選擇你是誰，這樣大家才知道是誰引爆的！");
+                return;
+            }
+
             const input = document.getElementById('guessInput');
             const guess = parseInt(input.value);
             
@@ -406,13 +424,14 @@
                 if (!game || game.gameOver) return;
 
                 if (guess <= game.min || guess >= game.max) {
-                    alert(`傻瓜，請猜有效範圍內 (${game.min} ~ ${game.max}) 的數字！`);
+                    alert(`請猜有效範圍內 (${game.min} ~ ${game.max}) 的數字！`);
                     return;
                 }
 
                 if (guess === game.answer) {
                     game.gameOver = true;
-                    game.msg = `🎉 💥 爆炸了！！密碼就是【 ${game.answer} 】`;
+                    // 將爆炸者的名字寫入廣播訊息
+                    game.msg = `🎉 💥 爆炸了！！<br>【 ${playerName} 】踩中地雷！<br>密碼是 ${game.answer}`;
                 } else if (guess < game.answer) {
                     game.min = Math.max(game.min, guess);
                 } else {
@@ -426,20 +445,17 @@
         }
 
         // === [7] 資料即時監聽與初始化掛載 ===
-        // 監聽成員
         db.ref('party_data/members').on('value', (snapshot) => {
             members = snapshot.val() || [];
             updateMemberUI();
             runSettlementAlgorithm(); 
         });
 
-        // 監聽消費項目
         db.ref('party_data/expenses').on('value', (snapshot) => {
             expenses = snapshot.val() || {};
             updateExpenseAndSettlementUI();
         });
 
-        // 初始化終極密碼
         initGameSync();
     </script>
 </body>
