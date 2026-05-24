@@ -7,532 +7,143 @@
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
-            --bg-color: #0b132b;       /* 清爽深藍底色 */
-            --card-bg: #1c2541;        /* 稍微淺一點的藍黑卡片 */
-            --primary-light: #90e0ef;  /* 核心：清透淡藍色 */
-            --accent-blue: #00b4d8;    /* 輔助藍色 */
-            --text-main: #edf2f4;      /* 主要文字顏色 */
-            --text-muted: #a2d2ff;    /* 次要淡藍文字 */
-            --border-color: #3a506b;   /* 細緻邊框藍 */
+            --bg-color: #0b132b; --card-bg: #1c2541; --primary-light: #90e0ef;
+            --accent-blue: #00b4d8; --text-main: #edf2f4; --text-muted: #a2d2ff; --border-color: #3a506b;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; overflow-x: hidden; }
+        .app-container { width: 100%; max-width: 500px; padding: 20px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 40px; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        /* 主畫面 */
+        #welcomeScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        #welcomeScreen.hide { opacity: 0; transform: translateY(-100%); pointer-events: none; }
+        .welcome-title { font-size: 28px; font-weight: 300; letter-spacing: 4px; color: var(--primary-light); margin-bottom: 50px; }
+        .enter-btn { background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 14px 40px; border-radius: 30px; font-size: 15px; cursor: pointer; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 500px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding-bottom: 40px;
-        }
-
-        /* ================= 🌟 科技感主畫面樣式 ================= */
-        #welcomeScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-color);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 20px;
-        }
-
-        #welcomeScreen.hide {
-            opacity: 0;
-            transform: translateY(-100%);
-            pointer-events: none;
-        }
-
-        .welcome-title {
-            font-size: 28px;
-            font-weight: 300;
-            letter-spacing: 4px;
-            color: var(--primary-light);
-            text-shadow: 0 0 12px rgba(144, 224, 239, 0.4);
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .welcome-subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-            letter-spacing: 2px;
-            margin-bottom: 50px;
-            opacity: 0.8;
-        }
-
-        .tech-tree {
-            position: relative;
-            width: 0;
-            height: 0;
-            border-left: 60px solid transparent;
-            border-right: 60px solid transparent;
-            border-bottom: 80px solid rgba(144, 224, 239, 0.15);
-            margin-bottom: 10px;
-            animation: pulse 3s infinite ease-in-out;
-        }
-        .tech-tree::before {
-            content: ''; position: absolute; top: 40px; left: -80px; width: 0; height: 0;
-            border-left: 80px solid transparent; border-right: 80px solid transparent; border-bottom: 100px solid rgba(144, 224, 239, 0.1);
-        }
-        .tech-tree::after {
-            content: ''; position: absolute; top: 90px; left: -100px; width: 0; height: 0;
-            border-left: 100px solid transparent; border-right: 100px solid transparent; border-bottom: 120px solid rgba(144, 224, 239, 0.05);
-        }
-
-        .tree-star {
-            width: 12px; height: 12px; background: var(--primary-light); position: absolute;
-            top: -15px; left: -6px; transform: rotate(45deg); box-shadow: 0 0 15px var(--primary-light);
-            animation: blink 1.5s infinite ease-in-out;
-        }
-
-        @keyframes pulse {
-            0%, 100% { filter: drop-shadow(0 0 5px rgba(144, 224, 239, 0.2)); }
-            50% { filter: drop-shadow(0 0 20px rgba(144, 224, 239, 0.5)); }
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; transform: rotate(45deg) scale(1.2); }
-        }
-
-        .enter-btn {
-            margin-top: 80px; background: transparent; border: 1px solid var(--primary-light);
-            color: var(--primary-light); padding: 14px 40px; border-radius: 30px; font-size: 15px;
-            letter-spacing: 2px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 10px rgba(144, 224, 239, 0.1);
-        }
-        .enter-btn:hover { background: rgba(144, 224, 239, 0.1); box-shadow: 0 0 20px rgba(144, 224, 239, 0.3); }
-
-        /* ================= 📊 後台主內容樣式 ================= */
-        header {
-            text-align: center;
-            padding: 20px 0 10px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-        header h1 {
-            font-size: 22px;
-            font-weight: 400;
-            letter-spacing: 2px;
-            color: var(--primary-light);
-        }
-
-        .tabs { display: flex; gap: 10px; margin-bottom: 5px; }
-        .tab-btn {
-            flex: 1; padding: 12px; background: rgba(28, 37, 65, 0.5);
-            border: 1px solid var(--border-color); color: var(--text-muted);
-            border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s;
-        }
-        .tab-btn.active {
-            background: var(--card-bg); border-color: var(--primary-light); color: var(--primary-light);
-            box-shadow: 0 0 10px rgba(144, 224, 239, 0.1);
-        }
-
-        .tab-content { display: none; flex-direction: column; gap: 20px; }
-        .tab-content.active { display: flex; }
-
-        .card {
-            background-color: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        .card-title { 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 16px; 
-            color: var(--primary-light); 
-            margin-bottom: 15px; 
-            font-weight: 500; 
-        }
-
+        /* 卡片與內容 */
+        header { text-align: center; padding: 20px 0; border-bottom: 1px solid var(--border-color); }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .card-title { display: flex; justify-content: space-between; align-items: center; color: var(--primary-light); margin-bottom: 15px; font-size: 16px; }
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input[type="text"], input[type="number"], select {
-            flex: 1; 
-            min-width: 0; /* 修正金額框超出問題 */
-            background-color: rgba(11, 19, 43, 0.6); border: 1px solid var(--border-color);
-            border-radius: 8px; padding: 10px 14px; color: var(--text-main); font-size: 14px; outline: none;
-        }
-        button {
-            background-color: transparent; border: 1px solid var(--primary-light); color: var(--primary-light);
-            padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s;
-        }
-        button:hover { background-color: rgba(144, 224, 239, 0.1); }
-        button.btn-block { width: 100%; background-color: rgba(144, 224, 239, 0.05); margin-top: 5px; }
-
-        /* 清除按鈕 */
-        button.btn-danger {
-            border-color: #ef233c;
-            color: #ef233c;
-            padding: 4px 10px;
-            font-size: 12px;
-        }
-        button.btn-danger:hover {
-            background-color: rgba(239, 35, 60, 0.1);
-        }
-
-        .member-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .tag {
-            background-color: rgba(58, 80, 107, 0.4); border: 1px solid var(--border-color);
-            color: var(--text-muted); padding: 6px 12px; border-radius: 20px; font-size: 13px;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .tag .remove-btn { cursor: pointer; color: #ef233c; font-weight: bold; }
-
-        .checkbox-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 10px; margin: 10px 0 15px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 8px;
-        }
-        .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
-
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(58, 80, 107, 0.3); font-size: 14px; }
-        .list-item:last-child { border-bottom: none; }
-        .item-detail { display: flex; flex-direction: column; gap: 4px; }
-        .item-subtitle { font-size: 12px; color: var(--text-muted); }
-        .amount-txt { color: var(--primary-light); font-weight: 500; }
-
-        .settle-route {
-            background-color: rgba(144, 224, 239, 0.03); border-left: 3px solid var(--primary-light);
-            padding: 12px; margin-bottom: 10px; border-radius: 0 8px 8px 0; font-size: 14px; display: flex; justify-content: space-between;
-        }
-
-        .lucky-display {
-            font-size: 28px; text-align: center; padding: 30px 10px; color: var(--primary-light); font-weight: 300;
-            letter-spacing: 2px; border: 1px dashed var(--border-color); border-radius: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.1);
-        }
-        .game-result-box { margin-top: 15px; padding: 15px; background: rgba(144, 224, 239, 0.02); border: 1px solid var(--border-color); border-radius: 12px; font-size: 14px; line-height: 1.8; }
+        input, select { flex: 1; min-width: 0; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: white; }
+        button { background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 8px 15px; border-radius: 8px; cursor: pointer; }
+        .btn-block { width: 100%; margin-top: 10px; padding: 12px; }
+        .btn-danger { border-color: #ef233c; color: #ef233c; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(58, 80, 107, 0.3); }
+        .amount-txt { color: var(--primary-light); font-weight: bold; }
+        .cloud-status { text-align: center; font-size: 11px; color: #4caf50; margin-bottom: 10px; }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
 <div id="welcomeScreen">
-    <div class="welcome-title">2026 CHRISTMAS</div>
-    <div class="welcome-subtitle">PARTY CONTROLLER</div>
-    
-    <div class="tech-tree">
-        <div class="tree-star"></div>
-    </div>
-    
-    <button class="enter-btn" onclick="enterApp()">LAUNCH SYSTEM</button>
+    <div class="welcome-title">2026 CHRISTMAS PARTY</div>
+    <button class="enter-btn" onclick="document.getElementById('welcomeScreen').classList.add('hide')">進入系統</button>
 </div>
 
 <div class="app-container">
-    <header>
-        <h1>2026 CHRISTMAS PARTY</h1>
-    </header>
+    <header><h1>2026 CHRISTMAS</h1></header>
+    <div class="cloud-status">⚡ 雲端即時連線中</div>
 
     <div class="card">
-        <div class="card-title">👥 派對成員名單</div>
+        <div class="card-title">👥 成員名單</div>
         <div class="input-group">
-            <input type="text" id="memberInput" placeholder="輸入名字（如：小明）...">
+            <input type="text" id="memberInput" placeholder="輸入名字...">
             <button onclick="addMember()">新增</button>
         </div>
-        <div class="member-tags" id="memberTagsContainer"></div>
+        <div id="memberTagsContainer"></div>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('accounting')">💰 派對記帳</button>
-        <button class="tab-btn" onclick="switchTab('games')">🎮 聖誕遊戲</button>
+    <div class="card">
+        <div class="card-title">💵 新增消費</div>
+        <input type="text" id="expenseDesc" placeholder="項目" style="width:100%; margin-bottom:5px;">
+        <div class="input-group">
+            <input type="number" id="expenseAmount" placeholder="金額">
+            <select id="payerSelect"></select>
+        </div>
+        <button class="btn-block" onclick="addExpense()">儲存消費</button>
     </div>
 
-    <div id="accountingTab" class="tab-content active">
-        <div class="card">
-            <div class="card-title">💵 新增消費紀錄</div>
-            <div class="input-group">
-                <input type="text" id="expenseDesc" placeholder="消費項目（如：烤雞）">
-                <input type="number" id="expenseAmount" placeholder="金額">
-            </div>
-            <div style="margin-bottom: 8px; font-size: 13px; color: var(--text-muted);">誰付的錢：</div>
-            <select id="payerSelect" style="width: 100%; margin-bottom: 15px;"></select>
-            <div style="margin-bottom: 4px; font-size: 13px; color: var(--text-muted);">誰要平攤：</div>
-            <div class="checkbox-grid" id="splitterCheckboxGrid"></div>
-            <button class="btn-block" onclick="addExpense()">儲存此筆消費</button>
-        </div>
-        <div class="card">
-            <div class="card-title">
-                <span>📝 消費明細</span>
-                <button class="btn-danger" onclick="clearAllExpenses()">清空帳目</button>
-            </div>
-            <div id="expenseListContainer"></div>
-        </div>
-        <div class="card">
-            <div class="card-title">✨ 最速還錢路線結算</div>
-            <div id="settlementContainer"></div>
-        </div>
+    <div class="card">
+        <div class="card-title">📝 消費明細</div>
+        <div id="expenseListContainer"></div>
     </div>
 
-    <div id="gamesTab" class="tab-content">
-        <div class="card">
-            <div class="card-title">🎲 科技感隨機抽籤</div>
-            <div class="lucky-display" id="luckyDisplay">READY</div>
-            <button class="btn-block" onclick="drawLuckyOne()">召喚幸運兒</button>
+    <div class="card">
+        <div class="card-title">🎁 交換禮物
+            <button class="btn-danger" onclick="clearGiftResult()">清除</button>
         </div>
-        <div class="card">
-            <div class="card-title">
-                <span>🎁 交換禮物精準配對</span>
-                <button class="btn-danger" onclick="clearGiftResult()">清除結果</button>
-            </div>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
-                系統內建防迴圈演算法，**每個人絕對不會抽到自己**！
-            </p>
-            <button class="btn-block" onclick="matchGifts()">開始精準配對</button>
-            <div id="giftResultBox" class="game-result-box" style="display: none;"></div>
-        </div>
+        <button class="btn-block" onclick="matchGifts()">開始配對</button>
+        <div id="giftResultBox" style="margin-top:15px; display:none;"></div>
     </div>
 </div>
 
 <script>
-    // 🔍 終極快取清洗器：強迫手機忘記所有舊的 icon 錯誤記憶
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) { registration.unregister(); }
-        });
-    }
-    if ('caches' in window) {
-        caches.keys().then(function(names) {
-            for (let name of names) caches.delete(name);
-        });
-    }
+    const firebaseConfig = {
+        apiKey: "請填入你的API_KEY",
+        authDomain: "請填入你的AUTH_DOMAIN",
+        databaseURL: "請填入你的DATABASE_URL",
+        projectId: "請填入你的PROJECT_ID",
+        storageBucket: "請填入你的STORAGE_BUCKET",
+        messagingSenderId: "請填入你的MESSAGING_SENDER_ID",
+        appId: "請填入你的APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // 💾 初始化資料（優先讀取本地記憶卡）
-    let members = JSON.parse(localStorage.getItem('party_members')) || [];
-    let expenses = JSON.parse(localStorage.getItem('party_expenses')) || [];
-    let savedLucky = localStorage.getItem('party_lucky') || 'READY';
-    let savedGiftHtml = localStorage.getItem('party_gift_html') || '';
+    let members = [], expenses = [];
 
-    // 啟動主畫面解鎖進入
-    function enterApp() {
-        const welcome = document.getElementById('welcomeScreen');
-        welcome.classList.add('hide');
-    }
-
-    // 分頁切換
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        if (tabName === 'accounting') {
-            document.querySelectorAll('.tab-btn')[0].classList.add('active');
-            document.getElementById('accountingTab').classList.add('active');
+    db.ref('party_data').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        members = data.members || [];
+        expenses = data.expenses || [];
+        updateUI();
+        if(data.gift_html) {
+            document.getElementById('giftResultBox').style.display = 'block';
+            document.getElementById('giftResultBox').innerHTML = data.gift_html;
         } else {
-            document.querySelectorAll('.tab-btn')[1].classList.add('active');
-            document.getElementById('gamesTab').classList.add('active');
+            document.getElementById('giftResultBox').style.display = 'none';
         }
-    }
+    });
 
-    // 儲存資料到本地
-    function saveToLocalStorage() {
-        localStorage.setItem('party_members', JSON.stringify(members));
-        localStorage.setItem('party_expenses', JSON.stringify(expenses));
-    }
+    function sync() { db.ref('party_data').set({ members, expenses }); }
 
-    // 新增成員
     function addMember() {
-        const input = document.getElementById('memberInput');
-        const name = input.value.trim();
-        if (!name) return;
-        if (members.includes(name)) { alert('名字重複囉！'); return; }
-        members.push(name);
-        input.value = '';
-        saveToLocalStorage();
-        updateMemberUI();
-        calculateSplit();
-    }
-
-    function removeMember(name) {
-        if(!confirm(`確定要移除 ${name} 嗎？這將會同步刪除由他付費的帳目喔！`)) return;
-        members = members.filter(m => m !== name);
-        expenses = expenses.filter(exp => exp.paidBy !== name);
-        expenses.forEach(exp => { exp.splitWith = exp.splitWith.filter(s => s !== name); });
-        expenses = expenses.filter(exp => exp.splitWith.length > 0);
-        saveToLocalStorage();
-        updateMemberUI();
-        updateExpenseListUI();
-        calculateSplit();
-    }
-
-    function updateMemberUI() {
-        document.getElementById('memberTagsContainer').innerHTML = members.map(m => `
-            <div class="tag">${m} <span class="remove-btn" onclick="removeMember('${m}')">×</span></div>
-        `).join('');
-        const payerSelect = document.getElementById('payerSelect');
-        payerSelect.innerHTML = members.length === 0 ? '<option value="">-- 請先新增成員 --</option>' : members.map(m => `<option value="${m}">${m}</option>`).join('');
-        const checkboxGrid = document.getElementById('splitterCheckboxGrid');
-        checkboxGrid.innerHTML = members.length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">暫無成員</span>' : members.map(m => `
-            <label class="checkbox-label"><input type="checkbox" name="splitters" value="${m}" checked> ${m}</label>
-        `).join('');
+        const name = document.getElementById('memberInput').value.trim();
+        if(name && !members.includes(name)) { members.push(name); document.getElementById('memberInput').value=''; sync(); }
     }
 
     function addExpense() {
-        const descInput = document.getElementById('expenseDesc');
-        const amountInput = document.getElementById('expenseAmount');
+        const desc = document.getElementById('expenseDesc').value;
+        const amount = document.getElementById('expenseAmount').value;
         const paidBy = document.getElementById('payerSelect').value;
-        const desc = descInput.value.trim() || '未命名開銷';
-        const amount = parseFloat(amountInput.value);
-
-        if (!amount || amount <= 0) { alert('請輸入金額！'); return; }
-        if (!paidBy) { alert('請選擇付款人！'); return; }
-
-        const checkboxes = document.querySelectorAll('input[name="splitters"]:checked');
-        const splitWith = Array.from(checkboxes).map(cb => cb.value);
-        if (splitWith.length === 0) { alert('請勾選平攤人！'); return; }
-
-        expenses.push({ desc, amount, paidBy, splitWith });
-        descInput.value = ''; amountInput.value = '';
-        saveToLocalStorage();
-        updateExpenseListUI();
-        calculateSplit();
+        if(desc && amount && paidBy) { expenses.push({desc, amount, paidBy}); sync(); }
     }
 
-    function updateExpenseListUI() {
-        const container = document.getElementById('expenseListContainer');
-        if (expenses.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 14px; padding: 10px 0;">暫無消費紀錄</p>';
-            return;
-        }
-        container.innerHTML = expenses.map(exp => `
+    function deleteExpense(index) { expenses.splice(index, 1); sync(); }
+
+    function updateUI() {
+        document.getElementById('memberTagsContainer').innerHTML = members.map(m => `<span style="padding:5px; margin:2px; background:#3a506b; border-radius:10px;">${m}</span>`).join(' ');
+        document.getElementById('payerSelect').innerHTML = members.map(m => `<option>${m}</option>`).join('');
+        document.getElementById('expenseListContainer').innerHTML = expenses.map((e, i) => `
             <div class="list-item">
-                <div class="item-detail">
-                    <div>${exp.desc}</div>
-                    <div class="item-subtitle">由 ${exp.paidBy} 墊付 (${exp.splitWith.join(', ')})</div>
-                </div>
-                <div class="amount-txt">$${exp.amount}</div>
+                <div>${e.desc} (${e.paidBy})</div>
+                <div><span class="amount-txt">$${e.amount}</span> <button class="btn-danger" onclick="deleteExpense(${i})">x</button></div>
             </div>
         `).join('');
     }
 
-    function clearAllExpenses() {
-        if (confirm('確定要清空所有的消費紀錄重新記帳嗎？（成員名單會保留）')) {
-            expenses = [];
-            saveToLocalStorage();
-            updateExpenseListUI();
-            calculateSplit();
-        }
-    }
-
-    function calculateSplit() {
-        const container = document.getElementById('settlementContainer');
-        if (members.length === 0 || expenses.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 14px; padding: 10px 0;">新增開銷後自動計算</p>';
-            return;
-        }
-
-        let balances = {};
-        members.forEach(m => balances[m] = 0);
-        expenses.forEach(exp => {
-            const avg = exp.amount / exp.splitWith.length;
-            balances[exp.paidBy] += exp.amount;
-            exp.splitWith.forEach(s => { balances[s] -= avg; });
-        });
-
-        let debtors = [], creditors = [];
-        for (let m in balances) {
-            if (balances[m] < -0.1) debtors.push({ name: m, amount: -balances[m] });
-            else if (balances[m] > 0.1) creditors.push({ name: m, amount: balances[m] });
-        }
-
-        let html = '', i = 0, j = 0;
-        while (i < debtors.length && j < creditors.length) {
-            let debtor = debtors[i], creditor = creditors[j];
-            let settleAmount = Math.min(debtor.amount, creditor.amount);
-            html += `
-                <div class="settle-route">
-                    <div><span>${debtor.name}</span><span style="color:var(--accent-blue);margin:0 8px;">➔</span><span>${creditor.name}</span></div>
-                    <div class="amount-txt">$${Math.round(settleAmount)}</div>
-                </div>
-            `;
-            debtor.amount -= settleAmount; creditor.amount -= settleAmount;
-            if (debtor.amount < 0.1) i++; if (creditor.amount < 0.1) j++;
-        }
-        container.innerHTML = html || '<p style="text-align: center; color: #4caf50; font-size: 14px; padding: 10px 0;">✓ 帳目完全平分！</p>';
-    }
-
-    function drawLuckyOne() {
-        if (members.length === 0) { alert('成員名單裡面沒有人可以抽喔！'); return; }
-        const display = document.getElementById('luckyDisplay');
-        let counter = 0;
-        const interval = setInterval(() => {
-            const randomName = members[Math.floor(Math.random() * members.length)];
-            display.innerText = randomName;
-            counter++;
-            if (counter > 15) {
-                clearInterval(interval);
-                const luckyOne = members[Math.floor(Math.random() * members.length)];
-                const finalStr = `🎉 ${luckyOne} 🎉`;
-                display.innerText = finalStr;
-                localStorage.setItem('party_lucky', finalStr); // 記憶幸運兒
-            }
-        }, 80);
-    }
-
     function matchGifts() {
-        if (members.length < 2) { alert('至少需要 2 位成員才能進行交換禮物！'); return; }
-        const resultBox = document.getElementById('giftResultBox');
-        let giver = [...members], receiver = [...members], valid = false, attempts = 0;
-
-        while (!valid && attempts < 500) {
-            attempts++;
-            for (let i = receiver.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [receiver[i], receiver[j]] = [receiver[j], receiver[i]];
-            }
-            valid = true;
-            for (let i = 0; i < giver.length; i++) {
-                if (giver[i] === receiver[i]) { valid = false; break; }
-            }
-        }
-
-        resultBox.style.display = 'block';
-        let resultHtml = '<strong style="color:var(--primary-light);">🎁 交換禮物配對結果：</strong><br>';
-        for (let i = 0; i < giver.length; i++) {
-            resultHtml += `• <strong>${giver[i]}</strong> ➔ 抽中 <strong>${receiver[i]}</strong> 的禮物<br>`;
-        }
-        resultBox.innerHTML = resultHtml;
-        localStorage.setItem('party_gift_html', resultHtml); // 記憶交換禮物結果
+        let r = [...members].sort(() => Math.random() - 0.5);
+        let h = members.map((m, i) => `• ${m} 抽中 ${r[i]}`).join('<br>');
+        db.ref('party_data/gift_html').set(h);
     }
 
     function clearGiftResult() {
-        const resultBox = document.getElementById('giftResultBox');
-        resultBox.style.display = 'none';
-        resultBox.innerHTML = '';
-        localStorage.removeItem('party_gift_html');
+        if(prompt("輸入管理員密碼 (9527)：") === "9527") db.ref('party_data/gift_html').remove();
     }
-
-    // 🔄 載入網頁時自動還原上一次的狀態
-    function initApp() {
-        updateMemberUI(); 
-        updateExpenseListUI(); 
-        calculateSplit();
-        
-        // 還原抽籤與遊戲歷史
-        document.getElementById('luckyDisplay').innerText = savedLucky;
-        if(savedGiftHtml) {
-            const resultBox = document.getElementById('giftResultBox');
-            resultBox.style.display = 'block';
-            resultBox.innerHTML = savedGiftHtml;
-        }
-    }
-
-    initApp();
 </script>
 </body>
 </html>
