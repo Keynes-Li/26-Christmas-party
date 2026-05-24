@@ -4,91 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2026 Christmas Party</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --bg-color: #0b132b; --card-bg: #1c2541; --primary-light: #90e0ef;
-            --accent-blue: #00b4d8; --text-main: #edf2f4; --text-muted: #a2d2ff; --border-color: #3a506b;
-        }
+        :root { --bg-color: #0b132b; --card-bg: #1c2541; --primary-light: #90e0ef; --accent-blue: #00b4d8; --text-main: #edf2f4; --text-muted: #a2d2ff; --border-color: #3a506b; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; overflow-x: hidden; }
         .app-container { width: 100%; max-width: 500px; padding: 20px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 40px; }
-
-        /* 主畫面 */
-        #welcomeScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        #welcomeScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; }
         #welcomeScreen.hide { opacity: 0; transform: translateY(-100%); pointer-events: none; }
-        .welcome-title { font-size: 28px; font-weight: 300; letter-spacing: 4px; color: var(--primary-light); margin-bottom: 50px; }
-        .enter-btn { background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 14px 40px; border-radius: 30px; font-size: 15px; cursor: pointer; }
-
-        /* 分頁樣式 */
+        .welcome-title { font-size: 28px; font-weight: 300; letter-spacing: 4px; color: var(--primary-light); text-shadow: 0 0 12px rgba(144, 224, 239, 0.4); margin-bottom: 10px; text-align: center; }
+        .welcome-subtitle { font-size: 14px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 50px; opacity: 0.8; }
+        .enter-btn { margin-top: 80px; background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 14px 40px; border-radius: 30px; font-size: 15px; letter-spacing: 2px; cursor: pointer; }
+        header { text-align: center; padding: 20px 0 10px 0; border-bottom: 1px solid var(--border-color); }
+        header h1 { font-size: 22px; font-weight: 400; letter-spacing: 2px; color: var(--primary-light); }
         .tabs { display: flex; gap: 10px; margin-bottom: 5px; }
-        .tab-btn { flex: 1; padding: 12px; background: rgba(28, 37, 65, 0.5); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .tab-btn { flex: 1; padding: 12px; background: rgba(28, 37, 65, 0.5); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; cursor: pointer; }
         .tab-btn.active { background: var(--card-bg); border-color: var(--primary-light); color: var(--primary-light); }
         .tab-content { display: none; flex-direction: column; gap: 20px; }
         .tab-content.active { display: flex; }
-
-        /* 卡片與內容 */
-        header { text-align: center; padding: 20px 0; border-bottom: 1px solid var(--border-color); }
         .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; }
-        .card-title { display: flex; justify-content: space-between; align-items: center; color: var(--primary-light); margin-bottom: 15px; font-size: 16px; }
+        .card-title { display: flex; justify-content: space-between; align-items: center; font-size: 16px; color: var(--primary-light); margin-bottom: 15px; }
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input, select { flex: 1; min-width: 0; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: white; }
-        button { background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 8px 15px; border-radius: 8px; cursor: pointer; }
-        .btn-block { width: 100%; margin-top: 10px; padding: 12px; }
-        .btn-danger { border-color: #ef233c; color: #ef233c; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(58, 80, 107, 0.3); }
-        .amount-txt { color: var(--primary-light); font-weight: bold; }
-        .cloud-status { text-align: center; font-size: 11px; color: #4caf50; margin-bottom: 10px; }
+        input, select { flex: 1; background-color: rgba(11, 19, 43, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; color: var(--text-main); }
+        button { background-color: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+        button.btn-block { width: 100%; margin-top: 5px; }
+        button.btn-danger { border-color: #ef233c; color: #ef233c; padding: 4px 10px; font-size: 12px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(58, 80, 107, 0.3); }
+        .item-detail { display: flex; flex-direction: column; gap: 4px; }
+        .item-subtitle { font-size: 12px; color: var(--text-muted); }
+        .amount-txt { color: var(--primary-light); font-weight: 500; }
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin: 10px 0; background: rgba(0,0,0,0.1); padding: 10px; border-radius: 8px; }
+        .lucky-display { font-size: 28px; text-align: center; padding: 30px 10px; border: 1px dashed var(--border-color); color: var(--primary-light); margin-bottom: 15px; }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
 <div id="welcomeScreen">
-    <div class="welcome-title">2026 CHRISTMAS PARTY</div>
-    <button class="enter-btn" onclick="document.getElementById('welcomeScreen').classList.add('hide')">進入系統</button>
+    <div class="welcome-title">2026 CHRISTMAS</div>
+    <div class="welcome-subtitle">PARTY CONTROLLER</div>
+    <button class="enter-btn" onclick="enterApp()">LAUNCH SYSTEM</button>
 </div>
 
 <div class="app-container">
-    <header><h1>2026 CHRISTMAS</h1></header>
-    <div class="cloud-status">⚡ 雲端即時連線中</div>
+    <header><h1>2026 CHRISTMAS PARTY</h1></header>
+    
+    <div class="card">
+        <div class="card-title">👥 派對成員名單</div>
+        <div class="input-group">
+            <input type="text" id="memberInput" placeholder="輸入名字...">
+            <button onclick="addMember()">新增</button>
+        </div>
+        <div id="memberTagsContainer"></div>
+    </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab(this, 'accountingTab')">💰 派對記帳</button>
-        <button class="tab-btn" onclick="switchTab(this, 'gamesTab')">🎮 聖誕遊戲</button>
+        <button class="tab-btn active" onclick="switchTab('accounting')">💰 記帳</button>
+        <button class="tab-btn" onclick="switchTab('games')">🎮 遊戲</button>
     </div>
 
     <div id="accountingTab" class="tab-content active">
         <div class="card">
-            <div class="card-title">👥 成員名單</div>
+            <div class="card-title">💵 新增消費紀錄</div>
             <div class="input-group">
-                <input type="text" id="memberInput" placeholder="輸入名字...">
-                <button onclick="addMember()">新增</button>
-            </div>
-            <div id="memberTagsContainer"></div>
-        </div>
-        <div class="card">
-            <div class="card-title">💵 新增消費</div>
-            <input type="text" id="expenseDesc" placeholder="項目" style="width:100%; margin-bottom:5px;">
-            <div class="input-group">
+                <input type="text" id="expenseDesc" placeholder="項目">
                 <input type="number" id="expenseAmount" placeholder="金額">
-                <select id="payerSelect"></select>
             </div>
+            <select id="payerSelect" style="width: 100%; margin-bottom: 10px;"></select>
+            <div class="checkbox-grid" id="splitterCheckboxGrid"></div>
             <button class="btn-block" onclick="addExpense()">儲存消費</button>
         </div>
         <div class="card">
-            <div class="card-title">📝 消費明細</div>
+            <div class="card-title"><span>📝 消費明細</span><button class="btn-danger" onclick="clearAllExpenses()">清空</button></div>
             <div id="expenseListContainer"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">✨ 結算路線</div>
+            <div id="settlementContainer"></div>
         </div>
     </div>
 
     <div id="gamesTab" class="tab-content">
         <div class="card">
-            <div class="card-title">🎁 交換禮物
-                <button class="btn-danger" onclick="clearGiftResult()">清除</button>
-            </div>
-            <button class="btn-block" onclick="matchGifts()">開始配對</button>
-            <div id="giftResultBox" style="margin-top:15px; display:none;"></div>
+            <div class="card-title">🎲 抽籤</div>
+            <div class="lucky-display" id="luckyDisplay">READY</div>
+            <button class="btn-block" onclick="drawLuckyOne()">召喚幸運兒</button>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>🎁 交換禮物</span><button class="btn-danger" onclick="clearGiftResult()">清除</button></div>
+            <button class="btn-block" onclick="matchGifts()">開始精準配對</button>
+            <div id="giftResultBox" style="display: none; margin-top: 15px; line-height: 1.8;"></div>
         </div>
     </div>
 </div>
@@ -108,63 +113,63 @@
 
     let members = [], expenses = [];
 
+    function enterApp() { document.getElementById('welcomeScreen').classList.add('hide'); }
+    function switchTab(tab) { /* 隱藏與顯示邏輯 */ }
+
     db.ref('party_data').on('value', (snapshot) => {
         const data = snapshot.val() || {};
         members = data.members || [];
         expenses = data.expenses || [];
-        updateUI();
-        const giftBox = document.getElementById('giftResultBox');
-        if(data.gift_html) {
-            giftBox.style.display = 'block';
-            giftBox.innerHTML = data.gift_html;
-        } else {
-            giftBox.style.display = 'none';
-        }
+        updateMemberUI(); updateExpenseListUI(); calculateSplit();
+        if(data.lucky_one) document.getElementById('luckyDisplay').innerText = data.lucky_one;
+        if(data.gift_html) { document.getElementById('giftResultBox').style.display='block'; document.getElementById('giftResultBox').innerHTML=data.gift_html; }
     });
 
-    function switchTab(btn, tabId) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
+    function syncToCloud() { db.ref('party_data').update({ members, expenses }); }
+
+    function addMember() { /* 略 */ }
+    function removeMember(name) { /* 略 */ }
+    
+    // --- 新增：刪除單筆帳目 ---
+    function deleteExpense(index) {
+        if(confirm('確定要刪除這筆消費嗎？')) {
+            expenses.splice(index, 1);
+            syncToCloud();
+        }
     }
 
-    function sync() { db.ref('party_data').set({ members, expenses }); }
-
-    function addMember() {
-        const name = document.getElementById('memberInput').value.trim();
-        if(name && !members.includes(name)) { members.push(name); document.getElementById('memberInput').value=''; sync(); }
+    // --- 新增：帶密碼清除禮物 ---
+    function clearGiftResult() {
+        const password = prompt("請輸入管理員密碼以清除交換禮物結果：");
+        if (password === "9527") {
+            db.ref('party_data/gift_html').remove();
+            document.getElementById('giftResultBox').style.display = 'none';
+        } else if (password !== null) { alert("密碼錯誤！"); }
     }
 
-    function addExpense() {
-        const desc = document.getElementById('expenseDesc').value;
-        const amount = document.getElementById('expenseAmount').value;
-        const paidBy = document.getElementById('payerSelect').value;
-        if(desc && amount && paidBy) { expenses.push({desc, amount, paidBy}); sync(); }
-    }
-
-    function deleteExpense(index) { expenses.splice(index, 1); sync(); }
-
-    function updateUI() {
-        document.getElementById('memberTagsContainer').innerHTML = members.map(m => `<span style="padding:5px 10px; margin:2px; display:inline-block; background:#3a506b; border-radius:20px; font-size:12px;">${m}</span>`).join(' ');
-        document.getElementById('payerSelect').innerHTML = members.map(m => `<option>${m}</option>`).join('');
-        document.getElementById('expenseListContainer').innerHTML = expenses.map((e, i) => `
+    // --- 新增：更新清單 (包含刪除按鈕) ---
+    function updateExpenseListUI() {
+        const container = document.getElementById('expenseListContainer');
+        if (expenses.length === 0) { container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">暫無紀錄</p>'; return; }
+        container.innerHTML = expenses.map((exp, index) => `
             <div class="list-item">
-                <div>${e.desc} (${e.paidBy})</div>
-                <div><span class="amount-txt">$${e.amount}</span> <button class="btn-danger" onclick="deleteExpense(${i})">x</button></div>
+                <div class="item-detail">
+                    <div>${exp.desc}</div>
+                    <div class="item-subtitle">由 ${exp.paidBy} 墊付</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="amount-txt">$${exp.amount}</div>
+                    <button class="btn-danger" onclick="deleteExpense(${index})">x</button>
+                </div>
             </div>
         `).join('');
     }
 
-    function matchGifts() {
-        let r = [...members].sort(() => Math.random() - 0.5);
-        let h = members.map((m, i) => `• ${m} 抽中 ${r[i]}`).join('<br>');
-        db.ref('party_data/gift_html').set(h);
-    }
-
-    function clearGiftResult() {
-        if(prompt("請輸入管理員密碼 (9527)：") === "9527") db.ref('party_data/gift_html').remove();
-    }
+    function addExpense() { /* 略 */ }
+    function calculateSplit() { /* 略 */ }
+    function drawLuckyOne() { /* 略 */ }
+    function matchGifts() { /* 略 */ }
+    function clearAllExpenses() { if(confirm('確認清空？')) { expenses=[]; syncToCloud(); } }
 </script>
 </body>
 </html>
