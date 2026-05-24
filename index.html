@@ -60,7 +60,6 @@
             padding: 20px;
         }
 
-        /* 點擊後的消失動畫 */
         #welcomeScreen.hide {
             opacity: 0;
             transform: translateY(-100%);
@@ -85,7 +84,6 @@
             opacity: 0.8;
         }
 
-        /* 純 CSS 繪製的極簡幾何科技聖誕樹 */
         .tech-tree {
             position: relative;
             width: 0;
@@ -97,38 +95,17 @@
             animation: pulse 3s infinite ease-in-out;
         }
         .tech-tree::before {
-            content: '';
-            position: absolute;
-            top: 40px;
-            left: -80px;
-            width: 0;
-            height: 0;
-            border-left: 80px solid transparent;
-            border-right: 80px solid transparent;
-            border-bottom: 100px solid rgba(144, 224, 239, 0.1);
+            content: ''; position: absolute; top: 40px; left: -80px; width: 0; height: 0;
+            border-left: 80px solid transparent; border-right: 80px solid transparent; border-bottom: 100px solid rgba(144, 224, 239, 0.1);
         }
         .tech-tree::after {
-            content: '';
-            position: absolute;
-            top: 90px;
-            left: -100px;
-            width: 0;
-            height: 0;
-            border-left: 100px solid transparent;
-            border-right: 100px solid transparent;
-            border-bottom: 120px solid rgba(144, 224, 239, 0.05);
+            content: ''; position: absolute; top: 90px; left: -100px; width: 0; height: 0;
+            border-left: 100px solid transparent; border-right: 100px solid transparent; border-bottom: 120px solid rgba(144, 224, 239, 0.05);
         }
 
-        /* 樹頂的科技十字星 */
         .tree-star {
-            width: 12px;
-            height: 12px;
-            background: var(--primary-light);
-            position: absolute;
-            top: -15px;
-            left: -6px;
-            transform: rotate(45deg);
-            box-shadow: 0 0 15px var(--primary-light);
+            width: 12px; height: 12px; background: var(--primary-light); position: absolute;
+            top: -15px; left: -6px; transform: rotate(45deg); box-shadow: 0 0 15px var(--primary-light);
             animation: blink 1.5s infinite ease-in-out;
         }
 
@@ -142,22 +119,11 @@
         }
 
         .enter-btn {
-            margin-top: 80px;
-            background: transparent;
-            border: 1px solid var(--primary-light);
-            color: var(--primary-light);
-            padding: 14px 40px;
-            border-radius: 30px;
-            font-size: 15px;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 10px rgba(144, 224, 239, 0.1);
+            margin-top: 80px; background: transparent; border: 1px solid var(--primary-light);
+            color: var(--primary-light); padding: 14px 40px; border-radius: 30px; font-size: 15px;
+            letter-spacing: 2px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 10px rgba(144, 224, 239, 0.1);
         }
-        .enter-btn:hover {
-            background: rgba(144, 224, 239, 0.1);
-            box-shadow: 0 0 20px rgba(144, 224, 239, 0.3);
-        }
+        .enter-btn:hover { background: rgba(144, 224, 239, 0.1); box-shadow: 0 0 20px rgba(144, 224, 239, 0.3); }
 
         /* ================= 📊 後台主內容樣式 ================= */
         header {
@@ -190,19 +156,22 @@
             background-color: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
-        .card-title { font-size: 16px; color: var(--primary-light); margin-bottom: 15px; font-weight: 500; }
+        .card-title { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px; 
+            color: var(--primary-light); 
+            margin-bottom: 15px; 
+            font-weight: 500; 
+        }
 
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
         input[type="text"], input[type="number"], select {
-            flex: 1;
-            min-width: 0; /* 💡 關鍵：加上這一行，防止金額框框飛出去 */
-            background-color: rgba(11, 19, 43, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px 14px;
-            color: var(--text-main);
-            font-size: 14px;
-            outline: none;
+            flex: 1; 
+            min-width: 0; /* 修正金額框超出問題 */
+            background-color: rgba(11, 19, 43, 0.6); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 10px 14px; color: var(--text-main); font-size: 14px; outline: none;
         }
         button {
             background-color: transparent; border: 1px solid var(--primary-light); color: var(--primary-light);
@@ -210,6 +179,17 @@
         }
         button:hover { background-color: rgba(144, 224, 239, 0.1); }
         button.btn-block { width: 100%; background-color: rgba(144, 224, 239, 0.05); margin-top: 5px; }
+
+        /* 清除按鈕 */
+        button.btn-danger {
+            border-color: #ef233c;
+            color: #ef233c;
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+        button.btn-danger:hover {
+            background-color: rgba(239, 35, 60, 0.1);
+        }
 
         .member-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .tag {
@@ -289,7 +269,10 @@
             <button class="btn-block" onclick="addExpense()">儲存此筆消費</button>
         </div>
         <div class="card">
-            <div class="card-title">📝 消費明細</div>
+            <div class="card-title">
+                <span>📝 消費明細</span>
+                <button class="btn-danger" onclick="clearAllExpenses()">清空帳目</button>
+            </div>
             <div id="expenseListContainer"></div>
         </div>
         <div class="card">
@@ -305,7 +288,10 @@
             <button class="btn-block" onclick="drawLuckyOne()">召喚幸運兒</button>
         </div>
         <div class="card">
-            <div class="card-title">🎁 交換禮物精準配對</div>
+            <div class="card-title">
+                <span>🎁 交換禮物精準配對</span>
+                <button class="btn-danger" onclick="clearGiftResult()">清除結果</button>
+            </div>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
                 系統內建防迴圈演算法，**每個人絕對不會抽到自己**！
             </p>
@@ -319,29 +305,25 @@
     // 🔍 終極快取清洗器：強迫手機忘記所有舊的 icon 錯誤記憶
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
-                registration.unregister(); // 解除舊的 Service Worker 綁定
-            }
+            for(let registration of registrations) { registration.unregister(); }
         });
     }
-    // 清除舊快取儲存空間
     if ('caches' in window) {
         caches.keys().then(function(names) {
             for (let name of names) caches.delete(name);
         });
     }
-    let members = [];
-    let expenses = [];
+
+    // 💾 初始化資料（優先讀取本地記憶卡）
+    let members = JSON.parse(localStorage.getItem('party_members')) || [];
+    let expenses = JSON.parse(localStorage.getItem('party_expenses')) || [];
+    let savedLucky = localStorage.getItem('party_lucky') || 'READY';
+    let savedGiftHtml = localStorage.getItem('party_gift_html') || '';
 
     // 啟動主畫面解鎖進入
     function enterApp() {
         const welcome = document.getElementById('welcomeScreen');
         welcome.classList.add('hide');
-    }
-
-    // Service Worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('service-worker.js'); });
     }
 
     // 分頁切換
@@ -357,6 +339,12 @@
         }
     }
 
+    // 儲存資料到本地
+    function saveToLocalStorage() {
+        localStorage.setItem('party_members', JSON.stringify(members));
+        localStorage.setItem('party_expenses', JSON.stringify(expenses));
+    }
+
     // 新增成員
     function addMember() {
         const input = document.getElementById('memberInput');
@@ -365,15 +353,18 @@
         if (members.includes(name)) { alert('名字重複囉！'); return; }
         members.push(name);
         input.value = '';
+        saveToLocalStorage();
         updateMemberUI();
         calculateSplit();
     }
 
     function removeMember(name) {
+        if(!confirm(`確定要移除 ${name} 嗎？這將會同步刪除由他付費的帳目喔！`)) return;
         members = members.filter(m => m !== name);
         expenses = expenses.filter(exp => exp.paidBy !== name);
         expenses.forEach(exp => { exp.splitWith = exp.splitWith.filter(s => s !== name); });
         expenses = expenses.filter(exp => exp.splitWith.length > 0);
+        saveToLocalStorage();
         updateMemberUI();
         updateExpenseListUI();
         calculateSplit();
@@ -407,6 +398,7 @@
 
         expenses.push({ desc, amount, paidBy, splitWith });
         descInput.value = ''; amountInput.value = '';
+        saveToLocalStorage();
         updateExpenseListUI();
         calculateSplit();
     }
@@ -426,6 +418,15 @@
                 <div class="amount-txt">$${exp.amount}</div>
             </div>
         `).join('');
+    }
+
+    function clearAllExpenses() {
+        if (confirm('確定要清空所有的消費紀錄重新記帳嗎？（成員名單會保留）')) {
+            expenses = [];
+            saveToLocalStorage();
+            updateExpenseListUI();
+            calculateSplit();
+        }
     }
 
     function calculateSplit() {
@@ -476,7 +477,9 @@
             if (counter > 15) {
                 clearInterval(interval);
                 const luckyOne = members[Math.floor(Math.random() * members.length)];
-                display.innerText = `🎉 ${luckyOne} 🎉`;
+                const finalStr = `🎉 ${luckyOne} 🎉`;
+                display.innerText = finalStr;
+                localStorage.setItem('party_lucky', finalStr); // 記憶幸運兒
             }
         }, 80);
     }
@@ -504,9 +507,32 @@
             resultHtml += `• <strong>${giver[i]}</strong> ➔ 抽中 <strong>${receiver[i]}</strong> 的禮物<br>`;
         }
         resultBox.innerHTML = resultHtml;
+        localStorage.setItem('party_gift_html', resultHtml); // 記憶交換禮物結果
     }
 
-    updateMemberUI(); updateExpenseListUI(); calculateSplit();
+    function clearGiftResult() {
+        const resultBox = document.getElementById('giftResultBox');
+        resultBox.style.display = 'none';
+        resultBox.innerHTML = '';
+        localStorage.removeItem('party_gift_html');
+    }
+
+    // 🔄 載入網頁時自動還原上一次的狀態
+    function initApp() {
+        updateMemberUI(); 
+        updateExpenseListUI(); 
+        calculateSplit();
+        
+        // 還原抽籤與遊戲歷史
+        document.getElementById('luckyDisplay').innerText = savedLucky;
+        if(savedGiftHtml) {
+            const resultBox = document.getElementById('giftResultBox');
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = savedGiftHtml;
+        }
+    }
+
+    initApp();
 </script>
 </body>
 </html>
