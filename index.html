@@ -67,7 +67,8 @@
             opacity: 0;
             transform: translateY(-100%);
             pointer-events: none;
-        }
+            visibility: hidden;
+}
 
         .welcome-title {
             font-size: 28px;
@@ -364,6 +365,9 @@ function loadFromCloud() {
 function enterApp() {
     const welcome = document.getElementById('welcomeScreen');
     welcome.classList.add('hide');
+    setTimeout(() => {
+        welcome.style.display = 'none';
+    }, 600);
 }
 
 // Service Worker
