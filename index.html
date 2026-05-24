@@ -309,6 +309,20 @@
 </div>
 
 <script>
+    // 🔍 終極快取清洗器：強迫手機忘記所有舊的 icon 錯誤記憶
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+                registration.unregister(); // 解除舊的 Service Worker 綁定
+            }
+        });
+    }
+    // 清除舊快取儲存空間
+    if ('caches' in window) {
+        caches.keys().then(function(names) {
+            for (let name of names) caches.delete(name);
+        });
+    }
     let members = [];
     let expenses = [];
 
