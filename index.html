@@ -6,52 +6,119 @@
     <title>2026 Christmas Party</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background-color: #0b132b; color: #edf2f4; height: 100vh; overflow: hidden; }
         
-        .screen { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; }
-        #welcomeScreen { z-index: 100; background: #0b132b; }
-        #appContainer { z-index: 1; display: none; padding: 20px; overflow-y: auto; align-items: flex-start; }
+        /* 整個網頁的背景，並讓內容置中 */
+        body { 
+            background-color: #0b132b; 
+            color: #edf2f4; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; /* 水平置中 */
+        }
         
-        /* 分頁內容預設隱藏 */
+        /* 模擬手機 App 的外框 */
+        .app-wrapper {
+            width: 100%;
+            max-width: 500px; /* 限制最大寬度 */
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* 迎賓畫面 */
+        #welcomeScreen { 
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            background: #0b132b;
+            z-index: 100; 
+        }
+        
+        /* 主功能區 (預設隱藏) */
+        #appContainer { 
+            display: none; 
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 20px; 
+            overflow-y: auto; 
+        }
+        
+        /* 分頁內容 */
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
         
-        .nav-btns { margin-bottom: 20px; display: flex; gap: 10px; }
-        button { padding: 10px 20px; background: #1c2541; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 8px; cursor: pointer; }
+        /* 頂部導航列 */
+        .nav-btns { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+            width: 100%;
+        }
+        /* 讓上方切換按鈕各佔 50% 寬度 */
+        .nav-btns button { 
+            flex: 1; 
+            padding: 12px; 
+            background: #1c2541; 
+            border: 1px solid #90e0ef; 
+            color: #90e0ef; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px;
+        }
+
+        .welcome-btn {
+            padding: 15px 30px; 
+            background: transparent; 
+            border: 1px solid #90e0ef; 
+            color: #90e0ef; 
+            border-radius: 30px; 
+            cursor: pointer;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="welcomeScreen" class="screen">
-        <h1>2026 CHRISTMAS</h1>
-        <button onclick="enterApp()">LAUNCH SYSTEM</button>
-    </div>
-
-    <div id="appContainer" class="screen">
-        <div class="nav-btns">
-            <button onclick="switchTab('accounting')">💰 記帳</button>
-            <button onclick="switchTab('games')">🎮 遊戲</button>
+    <div class="app-wrapper">
+        
+        <div id="welcomeScreen">
+            <h1>2026 CHRISTMAS</h1>
+            <p>PARTY CONTROLLER</p>
+            <button class="welcome-btn" onclick="enterApp()">LAUNCH SYSTEM</button>
         </div>
 
-        <div id="accountingTab" class="tab-content active">
-            <h2>派對記帳區</h2>
+        <div id="appContainer">
+            <div class="nav-btns">
+                <button onclick="switchTab('accounting')">💰 記帳</button>
+                <button onclick="switchTab('games')">🎮 遊戲</button>
             </div>
 
-        <div id="gamesTab" class="tab-content">
-            <h2>交換禮物區</h2>
-            </div>
+            <div id="accountingTab" class="tab-content active">
+                <h2 style="margin-bottom: 20px;">派對記帳區</h2>
+                </div>
+
+            <div id="gamesTab" class="tab-content">
+                <h2 style="margin-bottom: 20px;">交換禮物區</h2>
+                </div>
+        </div>
+
     </div>
 
     <script>
+        // 進入 App
         function enterApp() {
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
         }
 
+        // 切換分頁
         function switchTab(tabName) {
-            // 隱藏所有頁面
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            // 顯示目標頁面
             document.getElementById(tabName + 'Tab').classList.add('active');
         }
     </script>
