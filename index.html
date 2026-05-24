@@ -40,8 +40,9 @@
         .action-btn.secondary { background: transparent; border: 1px solid #ff0054; color: #ff0054; }
 
         /* 成員標籤 */
-        .tag-container { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
-        .tag { display: inline-block; background: #3a506b; padding: 6px 12px; border-radius: 20px; font-size: 14px; }
+        .tag-container { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag { display: inline-flex; align-items: center; background: #3a506b; padding: 6px 12px; border-radius: 20px; font-size: 14px; }
+        .tag-delete { margin-left: 8px; cursor: pointer; color: #ff9f1c; font-size: 12px; font-weight: bold; padding: 2px; }
         
         /* 多人平攤勾選區 */
         .checkbox-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
@@ -65,8 +66,8 @@
     <div class="app-wrapper">
         
         <div id="welcomeScreen">
-            <h1>CHRISTMAS PARTY</h1>
-            <p>2026</p>
+            <h1>2026 CHRISTMAS</h1>
+            <p>PARTY CONTROLLER</p>
             <button class="welcome-btn" onclick="enterApp()">LAUNCH SYSTEM</button>
         </div>
 
@@ -80,9 +81,9 @@
                 
                 <div class="card">
                     <h3>👥 派對成員名單</h3>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="memberInput" placeholder="輸入名字 (如：凱文)..." style="margin: 0;">
-                        <button onclick="addMember()" style="padding: 0 15px; background: #90e0ef; border: none; color: #0b132b; font-weight: bold; border-radius: 8px; cursor: pointer;">新增</button>
+                    <div style="display: flex; gap: 8px; align-items: stretch;">
+                        <input type="text" id="memberInput" placeholder="輸入名字 (如：凱文)..." style="margin: 0; flex: 1;">
+                        <button onclick="addMember()" style="padding: 0 20px; background: #90e0ef; border: none; color: #0b132b; font-weight: bold; border-radius: 8px; cursor: pointer; white-space: nowrap;">新增</button>
                     </div>
                     <div id="memberTagsContainer" class="tag-container"></div>
                 </div>
@@ -181,12 +182,20 @@
             }
         }
 
+        // 刪除成員功能
+        function removeMember(name) {
+            if (confirm(`確定要移除成員「${name}」嗎？`)) {
+                let updated = members.filter(m => m !== name);
+                db.ref('party_data/members').set(updated);
+            }
+        }
+
         function updateMemberUI() {
-            // 更新成員標籤
+            // 更新成員標籤 (加入刪除按鈕)
             const tagsContainer = document.getElementById('memberTagsContainer');
-            tagsContainer.innerHTML = members.length ? '' : '<span style="color:#5c677d; font-size:14px;">暫無成員，請從上方新增</span>';
+            tagsContainer.innerHTML = members.length ? '' : '<span style="color:#5c677d; font-size:14px; margin-top:8px;">暫無成員，請從上方新增</span>';
             members.forEach(m => {
-                tagsContainer.innerHTML += `<span class="tag">${m}</span>`;
+                tagsContainer.innerHTML += `<span class="tag">${m} <span class="tag-delete" onclick="removeMember('${m}')">✖</span></span>`;
             });
 
             // 更新付款人下拉選單
