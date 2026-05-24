@@ -2,344 +2,86 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="聖誕派對">
-    <link rel="apple-touch-icon" href="icon.png">
-    <title>2026 Christmas Party</title>    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 Christmas Party</title>
     <style>
-        :root {
-            --bg-color: #0b132b;       /* 清爽深藍底色 */
-            --card-bg: #1c2541;        /* 稍微淺一點的藍黑卡片 */
-            --primary-light: #90e0ef;  /* 核心：清透淡藍色 */
-            --accent-blue: #00b4d8;    /* 輔助藍色 */
-            --text-main: #edf2f4;      /* 主要文字顏色 */
-            --text-muted: #a2d2ff;    /* 次要淡藍文字 */
-            --border-color: #3a506b;   /* 細緻邊框藍 */
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 500px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding-bottom: 40px;
-        }
-
-        /* ================= 🌟 科技感主畫面樣式 ================= */
-        #welcomeScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-color);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 20px;
-        }
-
-        /* 點擊後的消失動畫 */
-        #welcomeScreen.hide {
-            opacity: 0;
-            transform: translateY(-100%);
-            pointer-events: none;
-            visibility: hidden;
-}
-
-        .welcome-title {
-            font-size: 28px;
-            font-weight: 300;
-            letter-spacing: 4px;
-            color: var(--primary-light);
-            text-shadow: 0 0 12px rgba(144, 224, 239, 0.4);
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .welcome-subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-            letter-spacing: 2px;
-            margin-bottom: 50px;
-            opacity: 0.8;
-        }
-
-        /* 純 CSS 繪製的極簡幾何科技聖誕樹 */
-        .tech-tree {
-            position: relative;
-            width: 0;
-            height: 0;
-            border-left: 60px solid transparent;
-            border-right: 60px solid transparent;
-            border-bottom: 80px solid rgba(144, 224, 239, 0.15);
-            margin-bottom: 10px;
-            animation: pulse 3s infinite ease-in-out;
-        }
-        .tech-tree::before {
-            content: '';
-            position: absolute;
-            top: 40px;
-            left: -80px;
-            width: 0;
-            height: 0;
-            border-left: 80px solid transparent;
-            border-right: 80px solid transparent;
-            border-bottom: 100px solid rgba(144, 224, 239, 0.1);
-        }
-        .tech-tree::after {
-            content: '';
-            position: absolute;
-            top: 90px;
-            left: -100px;
-            width: 0;
-            height: 0;
-            border-left: 100px solid transparent;
-            border-right: 100px solid transparent;
-            border-bottom: 120px solid rgba(144, 224, 239, 0.05);
-        }
-
-        /* 樹頂的科技十字星 */
-        .tree-star {
-            width: 12px;
-            height: 12px;
-            background: var(--primary-light);
-            position: absolute;
-            top: -15px;
-            left: -6px;
-            transform: rotate(45deg);
-            box-shadow: 0 0 15px var(--primary-light);
-            animation: blink 1.5s infinite ease-in-out;
-        }
-
-        @keyframes pulse {
-            0%, 100% { filter: drop-shadow(0 0 5px rgba(144, 224, 239, 0.2)); }
-            50% { filter: drop-shadow(0 0 20px rgba(144, 224, 239, 0.5)); }
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; transform: rotate(45deg) scale(1.2); }
-        }
-
-        .enter-btn {
-            margin-top: 80px;
-            background: transparent;
-            border: 1px solid var(--primary-light);
-            color: var(--primary-light);
-            padding: 14px 40px;
-            border-radius: 30px;
-            font-size: 15px;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 10px rgba(144, 224, 239, 0.1);
-        }
-        .enter-btn:hover {
-            background: rgba(144, 224, 239, 0.1);
-            box-shadow: 0 0 20px rgba(144, 224, 239, 0.3);
-        }
-
-        /* ================= 📊 後台主內容樣式 ================= */
-        header {
-            text-align: center;
-            padding: 20px 0 10px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-        header h1 {
-            font-size: 22px;
-            font-weight: 400;
-            letter-spacing: 2px;
-            color: var(--primary-light);
-        }
-
-        .tabs { display: flex; gap: 10px; margin-bottom: 5px; }
-        .tab-btn {
-            flex: 1; padding: 12px; background: rgba(28, 37, 65, 0.5);
-            border: 1px solid var(--border-color); color: var(--text-muted);
-            border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s;
-        }
-        .tab-btn.active {
-            background: var(--card-bg); border-color: var(--primary-light); color: var(--primary-light);
-            box-shadow: 0 0 10px rgba(144, 224, 239, 0.1);
-        }
-
-        .tab-content { display: none; flex-direction: column; gap: 20px; }
-        .tab-content.active { display: flex; }
-
-        .card {
-            background-color: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        .card-title { font-size: 16px; color: var(--primary-light); margin-bottom: 15px; font-weight: 500; }
-
-        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input[type="text"], input[type="number"], select {
-            flex: 1;
-            min-width: 0; /* 💡 關鍵：加上這一行，防止金額框框飛出去 */
-            background-color: rgba(11, 19, 43, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px 14px;
-            color: var(--text-main);
-            font-size: 14px;
-            outline: none;
-        }
-        button {
-            background-color: transparent; border: 1px solid var(--primary-light); color: var(--primary-light);
-            padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s;
-        }
-        button:hover { background-color: rgba(144, 224, 239, 0.1); }
-        button.btn-block { width: 100%; background-color: rgba(144, 224, 239, 0.05); margin-top: 5px; }
-
-        .member-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .tag {
-            background-color: rgba(58, 80, 107, 0.4); border: 1px solid var(--border-color);
-            color: var(--text-muted); padding: 6px 12px; border-radius: 20px; font-size: 13px;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .tag .remove-btn { cursor: pointer; color: #ef233c; font-weight: bold; }
-
-        .checkbox-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 10px; margin: 10px 0 15px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 8px;
-        }
-        .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
-
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(58, 80, 107, 0.3); font-size: 14px; }
-        .list-item:last-child { border-bottom: none; }
-        .item-detail { display: flex; flex-direction: column; gap: 4px; }
-        .item-subtitle { font-size: 12px; color: var(--text-muted); }
-        .amount-txt { color: var(--primary-light); font-weight: 500; }
-
-        .settle-route {
-            background-color: rgba(144, 224, 239, 0.03); border-left: 3px solid var(--primary-light);
-            padding: 12px; margin-bottom: 10px; border-radius: 0 8px 8px 0; font-size: 14px; display: flex; justify-content: space-between;
-        }
-
-        .lucky-display {
-            font-size: 28px; text-align: center; padding: 30px 10px; color: var(--primary-light); font-weight: 300;
-            letter-spacing: 2px; border: 1px dashed var(--border-color); border-radius: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.1);
-        }
-        .game-result-box { margin-top: 15px; padding: 15px; background: rgba(144, 224, 239, 0.02); border: 1px solid var(--border-color); border-radius: 12px; font-size: 14px; line-height: 1.8; }
+        :root { --bg-color: #0b132b; --card-bg: #1c2541; --primary-light: #90e0ef; --text-main: #edf2f4; --border-color: #3a506b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; }
+        .app-container { width: 95%; max-width: 500px; padding: 20px; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0; background: #0b132b; border: 1px solid var(--border-color); color: white; border-radius: 8px; }
+        button { width: 100%; padding: 10px; background: transparent; border: 1px solid var(--primary-light); color: var(--primary-light); border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        .tag { display: inline-block; background: var(--border-color); padding: 5px 10px; border-radius: 20px; margin: 5px; font-size: 14px; }
     </style>
 </head>
 <body>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-<div id="welcomeScreen">
-    <div class="welcome-title">2026 CHRISTMAS</div>
-    <div class="welcome-subtitle">PARTY CONTROLLER</div>
-    
-    <div class="tech-tree">
-        <div class="tree-star"></div>
-    </div>
-    
-    <button class="enter-btn" onclick="enterApp()">LAUNCH SYSTEM</button>
-</div>
 
 <div class="app-container">
-    <header>
-        <h1>2026 CHRISTMAS PARTY</h1>
-    </header>
+    <div class="card">
+        <h3>👥 派對成員名單</h3>
+        <input type="text" id="memberInput" placeholder="輸入名字...">
+        <button onclick="addMember()">新增成員</button>
+        <div id="memberTagsContainer"></div>
+    </div>
 
     <div class="card">
-        <div class="card-title">👥 派對成員名單</div>
-        <div class="input-group">
-            <input type="text" id="memberInput" placeholder="輸入名字（如：醉漢）...">
-            <button onclick="addMember()">新增</button>
-        </div>
-        <div class="member-tags" id="memberTagsContainer"></div>
-    </div>
-
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('accounting')">💰 派對記帳</button>
-        <button class="tab-btn" onclick="switchTab('games')">🎮 聖誕遊戲</button>
-    </div>
-
-    <div id="accountingTab" class="tab-content active">
-        <div class="card">
-            <div class="card-title">💵 新增消費紀錄</div>
-            <div class="input-group">
-                <input type="text" id="expenseDesc" placeholder="消費項目（如：烤雞）">
-                <input type="number" id="expenseAmount" placeholder="金額">
-            </div>
-            <div style="margin-bottom: 8px; font-size: 13px; color: var(--text-muted);">誰付的錢：</div>
-            <select id="payerSelect" style="width: 100%; margin-bottom: 15px;"></select>
-            <div style="margin-bottom: 4px; font-size: 13px; color: var(--text-muted);">誰要平攤：</div>
-            <div class="checkbox-grid" id="splitterCheckboxGrid"></div>
-            <button class="btn-block" onclick="addExpense()">儲存此筆消費</button>
-        </div>
-        <div class="card">
-            <div class="card-title">📝 消費明細</div>
-            <div id="expenseListContainer"></div>
-        </div>
-        <div class="card">
-            <div class="card-title">✨ 最速還錢路線結算</div>
-            <div id="settlementContainer"></div>
-        </div>
-    </div>
-
-    <div id="gamesTab" class="tab-content">
-        <div class="card">
-            <div class="card-title">🎲 科技感隨機抽籤</div>
-            <div class="lucky-display" id="luckyDisplay">READY</div>
-            <button class="btn-block" onclick="drawLuckyOne()">召喚幸運兒</button>
-        </div>
-        <div class="card">
-            <div class="card-title">🎁 交換禮物精準配對</div>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
-                系統內建防迴圈演算法，**每個人絕對不會抽到自己**！
-            </p>
-            <button class="btn-block" onclick="matchGifts()">開始精準配對</button>
-            <div id="giftResultBox" class="game-result-box" style="display: none;"></div>
-        </div>
+        <h3>💵 選擇付款人</h3>
+        <select id="payerSelect"></select>
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <script>
-    // 確保這些函式在全域範圍內
+    const firebaseConfig = {
+        apiKey: "AIzaSyAHCELtsXy0EOM_PtCIhj1bviLCOAFK8dc",
+        authDomain: "christmas-party-d1644.firebaseapp.com",
+        databaseURL: "https://christmas-party-d1644-default-rtdb.firebaseio.com",
+        projectId: "christmas-party-d1644",
+        storageBucket: "christmas-party-d1644.firebasestorage.app",
+        messagingSenderId: "109660417434",
+        appId: "1:109660417434:web:1e3ad17e8b77a9b8069e23"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let members = [];
+
+    // 1. 更新介面的核心邏輯
+    function updateMemberUI() {
+        const container = document.getElementById('memberTagsContainer');
+        const select = document.getElementById('payerSelect');
+        container.innerHTML = '';
+        select.innerHTML = '<option value="">選擇付款人</option>';
+        
+        members.forEach(name => {
+            container.innerHTML += `<div class="tag">${name}</div>`;
+            select.innerHTML += `<option value="${name}">${name}</option>`;
+        });
+    }
+
+    // 2. 新增成員並存入雲端
     window.addMember = function() {
         const input = document.getElementById('memberInput');
-        if (!input || !input.value) {
-            alert("請輸入名字！");
-            return;
-        }
-        console.log("成員已加入:", input.value);
-        // 這裡放你原本的 Firebase 更新邏輯
-    };
-
-    window.enterApp = function() {
-        const welcome = document.getElementById('welcomeScreen');
-        if (welcome) {
-            welcome.style.display = 'none';
+        if (input.value) {
+            members.push(input.value);
+            input.value = '';
+            
+            db.ref('party_data').set({ members: members }).then(() => {
+                updateMemberUI();
+            });
         }
     };
 
-    console.log("系統功能已成功掛載至 window 物件");
+    // 3. 監聽雲端資料 (自動更新)
+    db.ref('party_data/members').on('value', (snapshot) => {
+        const data = snapshot.val();
+        members = data || [];
+        updateMemberUI();
+    });
 </script>
+
 </body>
 </html>
