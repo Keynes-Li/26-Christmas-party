@@ -365,14 +365,23 @@
     }
 
     function removeMember(name) {
+    // 🔍 加入確認彈窗，如果使用者按「取消」，函數會直接終止
+        if (!confirm(`⚠️ 確定要移除「${name}」嗎？\n\n這將會同步刪除由該成員付費的相關帳目，且無法復原！`)) {
+        return; 
+        }
+
+    // 若確認執行，繼續原本的邏輯
         members = members.filter(m => m !== name);
+    
+    // 同步移除該成員參與的帳目或清空該成員相關資料
         expenses = expenses.filter(exp => exp.paidBy !== name);
-        expenses.forEach(exp => { exp.splitWith = exp.splitWith.filter(s => s !== name); });
+        expenses.forEach(exp => { 
+            exp.splitWith = exp.splitWith.filter(s => s !== name); 
+        });
+    // 移除變空的開銷項目
         expenses = expenses.filter(exp => exp.splitWith.length > 0);
-        updateMemberUI();
-        updateExpenseListUI();
-        calculateSplit();
-    }
+    syncToCloud();
+}
 
     function updateMemberUI() {
         document.getElementById('memberTagsContainer').innerHTML = members.map(m => `
