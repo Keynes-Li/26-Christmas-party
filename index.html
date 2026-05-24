@@ -56,6 +56,42 @@
             text-shadow: 0 0 8px rgba(144, 224, 239, 0.3);
         }
 
+        /* 頁籤切換 */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(28, 37, 65, 0.5);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--card-bg);
+            border-color: var(--primary-light);
+            color: var(--primary-light);
+            box-shadow: 0 0 10px rgba(144, 224, 239, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
         .card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -70,9 +106,6 @@
             margin-bottom: 15px;
             font-weight: 500;
             letter-spacing: 1px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         /* 表單元素樣式 */
@@ -91,7 +124,6 @@
             color: var(--text-main);
             font-size: 14px;
             outline: none;
-            transition: border 0.3s;
         }
 
         input:focus, select:focus {
@@ -111,15 +143,15 @@
 
         button:hover {
             background-color: rgba(144, 224, 239, 0.1);
-            box-shadow: 0 0 10px rgba(144, 224, 239, 0.2);
         }
 
         button.btn-block {
             width: 100%;
             background-color: rgba(144, 224, 239, 0.05);
+            margin-top: 5px;
         }
 
-        /* 成員標籤列表 */
+        /* 成員標籤 */
         .member-tags {
             display: flex;
             flex-wrap: wrap;
@@ -145,16 +177,6 @@
             font-weight: bold;
         }
 
-        /* 勾選清單（分攤人選） */
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: var(--text-main);
-            cursor: pointer;
-        }
-
         .checkbox-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -165,7 +187,15 @@
             border-radius: 8px;
         }
 
-        /* 列表樣式 */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* 列表與路線 */
         .list-item {
             display: flex;
             justify-content: space-between;
@@ -175,27 +205,11 @@
             font-size: 14px;
         }
 
-        .list-item:last-child {
-            border-bottom: none;
-        }
+        .list-item:last-child { border-bottom: none; }
+        .item-detail { display: flex; flex-direction: column; gap: 4px; }
+        .item-subtitle { font-size: 12px; color: var(--text-muted); }
+        .amount-txt { color: var(--primary-light); font-weight: 500; }
 
-        .item-detail {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .item-subtitle {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .amount-txt {
-            color: var(--primary-light);
-            font-weight: 500;
-        }
-
-        /* 結算路線樣式 */
         .settle-route {
             background-color: rgba(144, 224, 239, 0.03);
             border-left: 3px solid var(--primary-light);
@@ -207,9 +221,28 @@
             justify-content: space-between;
         }
 
-        .route-arrow {
-            color: var(--accent-blue);
-            margin: 0 8px;
+        /* 遊戲專用樣式 */
+        .lucky-display {
+            font-size: 28px;
+            text-align: center;
+            padding: 30px 10px;
+            color: var(--primary-light);
+            font-weight: 300;
+            letter-spacing: 2px;
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .game-result-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(144, 224, 239, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.8;
         }
     </style>
 </head>
@@ -221,59 +254,86 @@
     </header>
 
     <div class="card">
-        <div class="card-title">👥 派對成員管理</div>
+        <div class="card-title">👥 派對成員名單</div>
         <div class="input-group">
-            <input type="text" id="memberInput" placeholder="請輸入成員名字...">
+            <input type="text" id="memberInput" placeholder="輸入名字（如：小明）...">
             <button onclick="addMember()">新增</button>
         </div>
-        <div class="member-tags" id="memberTagsContainer">
+        <div class="member-tags" id="memberTagsContainer"></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('accounting')">💰 派對記帳</button>
+        <button class="tab-btn" onclick="switchTab('games')">🎮 聖誕遊戲</button>
+    </div>
+
+    <div id="accountingTab" class="tab-content active">
+        <div class="card">
+            <div class="card-title">💵 新增消費紀錄</div>
+            <div class="input-group">
+                <input type="text" id="expenseDesc" placeholder="消費項目（如：烤雞）">
+                <input type="number" id="expenseAmount" placeholder="金額">
             </div>
-    </div>
+            
+            <div style="margin-bottom: 8px; font-size: 13px; color: var(--text-muted);">誰付的錢：</div>
+            <select id="payerSelect" style="width: 100%; margin-bottom: 15px;"></select>
 
-    <div class="card">
-        <div class="card-title">💰 新增消費紀錄</div>
-        <div class="input-group">
-            <input type="text" id="expenseDesc" placeholder="消費項目（如：披薩）">
-            <input type="number" id="expenseAmount" placeholder="金額">
+            <div style="margin-bottom: 4px; font-size: 13px; color: var(--text-muted);">誰要平攤：</div>
+            <div class="checkbox-grid" id="splitterCheckboxGrid"></div>
+
+            <button class="btn-block" onclick="addExpense()">儲存此筆消費</button>
         </div>
-        
-        <div style="margin-bottom: 8px; font-size: 13px; color: var(--text-muted);">誰付的錢：</div>
-        <select id="payerSelect" style="width: 100%; margin-bottom: 15px;">
-            <option value="">-- 請先新增成員 --</option>
-        </select>
 
-        <div style="margin-bottom: 4px; font-size: 13px; color: var(--text-muted);">誰要平攤（預設全選）：</div>
-        <div class="checkbox-grid" id="splitterCheckboxGrid">
-            </div>
+        <div class="card">
+            <div class="card-title">📝 消費明細</div>
+            <div id="expenseListContainer"></div>
+        </div>
 
-        <button class="btn-block" onclick="addExpense()">儲存此筆消費</button>
-    </div>
-
-    <div class="card">
-        <div class="card-title">📝 消費明細</div>
-        <div id="expenseListContainer">
-            <p style="text-align: center; color: var(--text-muted); font-size: 14px; padding: 10px 0;">暫無消費紀錄</p>
+        <div class="card">
+            <div class="card-title">✨ 最速還錢路線結算</div>
+            <div id="settlementContainer"></div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-title">✨ 最速還錢路線結算</div>
-        <div id="settlementContainer">
-            <p style="text-align: center; color: var(--text-muted); font-size: 14px; padding: 10px 0;">新增開銷後自動計算</p>
+    <div id="gamesTab" class="tab-content">
+        <div class="card">
+            <div class="card-title">🎲 科技感隨機抽籤</div>
+            <div class="lucky-display" id="luckyDisplay">READY</div>
+            <button class="btn-block" onclick="drawLuckyOne()">召喚幸運兒</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🎁 交換禮物精準配對</div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
+                系統將自動打散所有人進行禮物交換配對，內建核心防迴圈演算法，**每個人絕對不會抽到自己**！
+            </p>
+            <button class="btn-block" onclick="matchGifts()">開始精準配對</button>
+            <div id="giftResultBox" class="game-result-box" style="display: none;"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // 狀態資料儲存
     let members = [];
     let expenses = [];
 
-    // 註冊 Service Worker 確保離線可用
+    // Service Worker
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('service-worker.js');
-        });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('service-worker.js'); });
+    }
+
+    // 分頁切換邏輯
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        if (tabName === 'accounting') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('accountingTab').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('gamesTab').classList.add('active');
+        }
     }
 
     // 新增成員
@@ -281,13 +341,10 @@
         const input = document.getElementById('memberInput');
         const name = input.value.trim();
         if (!name) return;
-        if (members.includes(name)) {
-            alert('成員名字重複了！');
-            return;
-        }
+        if (members.includes(name)) { alert('名字重複囉！'); return; }
+        
         members.push(name);
         input.value = '';
-        
         updateMemberUI();
         calculateSplit();
     }
@@ -295,11 +352,8 @@
     // 刪除成員
     function removeMember(name) {
         members = members.filter(m => m !== name);
-        // 同步刪除包含該成員的消費紀錄
         expenses = expenses.filter(exp => exp.paidBy !== name);
-        expenses.forEach(exp => {
-            exp.splitWith = exp.splitWith.filter(s => s !== name);
-        });
+        expenses.forEach(exp => { exp.splitWith = exp.splitWith.filter(s => s !== name); });
         expenses = expenses.filter(exp => exp.splitWith.length > 0);
 
         updateMemberUI();
@@ -307,162 +361,164 @@
         calculateSplit();
     }
 
-    // 更新與成員相關的 UI (標籤、下拉選單、勾選框)
+    // 更新成員相關的所有介面
     function updateMemberUI() {
-        // 1. 更新標籤
-        const tagsContainer = document.getElementById('memberTagsContainer');
-        tagsContainer.innerHTML = members.map(m => `
-            <div class="tag">
-                ${m} <span class="remove-btn" onclick="removeMember('${m}')">×</span>
-            </div>
+        document.getElementById('memberTagsContainer').innerHTML = members.map(m => `
+            <div class="tag">${m} <span class="remove-btn" onclick="removeMember('${m}')">×</span></div>
         `).join('');
 
-        // 2. 更新付款人下拉選單
         const payerSelect = document.getElementById('payerSelect');
-        if (members.length === 0) {
-            payerSelect.innerHTML = '<option value="">-- 請先新增成員 --</option>';
-        } else {
-            payerSelect.innerHTML = members.map(m => `<option value="${m}">${m}</option>`).join('');
-        }
+        payerSelect.innerHTML = members.length === 0 ? '<option value="">-- 請先新增成員 --</option>' : members.map(m => `<option value="${m}">${m}</option>`).join('');
 
-        // 3. 更新平攤者勾選清單
         const checkboxGrid = document.getElementById('splitterCheckboxGrid');
-        if (members.length === 0) {
-            checkboxGrid.innerHTML = '<span style="font-size:12px; color:var(--text-muted);">暫無成員</span>';
-        } else {
-            checkboxGrid.innerHTML = members.map(m => `
-                <label class="checkbox-label">
-                    <input type="checkbox" name="splitters" value="${m}" checked> ${m}
-                </label>
-            `).join('');
-        }
+        checkboxGrid.innerHTML = members.length === 0 ? '<span style="font-size:12px; color:var(--text-muted);">暫無成員</span>' : members.map(m => `
+            <label class="checkbox-label"><input type="checkbox" name="splitters" value="${m}" checked> ${m}</label>
+        `).join('');
     }
 
-    // 新增一筆消費
+    // 儲存消費
     function addExpense() {
         const descInput = document.getElementById('expenseDesc');
         const amountInput = document.getElementById('expenseAmount');
-        const payerSelect = document.getElementById('payerSelect');
-        
-        const desc = descInput.value.trim() || '未命名項目';
+        const paidBy = document.getElementById('payerSelect').value;
+        const desc = descInput.value.trim() || '未命名開銷';
         const amount = parseFloat(amountInput.value);
-        const paidBy = payerSelect.value;
 
-        if (!amount || amount <= 0) {
-            alert('請輸入正確的金額！');
-            return;
-        }
-        if (!paidBy) {
-            alert('請先選擇是誰付的錢！');
-            return;
-        }
+        if (!amount || amount <= 0) { alert('請輸入金額！'); return; }
+        if (!paidBy) { alert('請選擇付款人！'); return; }
 
-        // 獲取有哪些人要一起平攤
         const checkboxes = document.querySelectorAll('input[name="splitters"]:checked');
         const splitWith = Array.from(checkboxes).map(cb => cb.value);
+        if (splitWith.length === 0) { alert('請勾選平攤人！'); return; }
 
-        if (splitWith.length === 0) {
-            alert('請至少勾選一位要平攤這筆費用的成員！');
-            return;
-        }
-
-        // 儲存消費紀錄
         expenses.push({ desc, amount, paidBy, splitWith });
-
-        // 清空輸入框
-        descInput.value = '';
-        amountInput.value = '';
+        descInput.value = ''; amountInput.value = '';
         
         updateExpenseListUI();
         calculateSplit();
     }
 
-    // 更新明細列表 UI
     function updateExpenseListUI() {
         const container = document.getElementById('expenseListContainer');
         if (expenses.length === 0) {
             container.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 14px; padding: 10px 0;">暫無消費紀錄</p>';
             return;
         }
-
         container.innerHTML = expenses.map(exp => `
             <div class="list-item">
                 <div class="item-detail">
                     <div>${exp.desc}</div>
-                    <div class="item-subtitle">由 ${exp.paidBy} 墊付 (${exp.splitWith.join(', ')} 平攤)</div>
+                    <div class="item-subtitle">由 ${exp.paidBy} 墊付 (${exp.splitWith.join(', ')})</div>
                 </div>
                 <div class="amount-txt">$${exp.amount}</div>
             </div>
         `).join('');
     }
 
-    // 核心演算法：計算還錢路線
+    // 記帳拆帳演算法
     function calculateSplit() {
         const container = document.getElementById('settlementContainer');
-        
         if (members.length === 0 || expenses.length === 0) {
             container.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 14px; padding: 10px 0;">新增開銷後自動計算</p>';
             return;
         }
 
-        // 1. 初始化收支帳本
         let balances = {};
         members.forEach(m => balances[m] = 0);
 
-        // 2. 統計每個人該收/該付的淨值
         expenses.forEach(exp => {
-            const payer = exp.paidBy;
-            const amount = exp.amount;
-            const splitters = exp.splitWith;
-            const avg = amount / splitters.length;
-
-            balances[payer] += amount; // 幫大家墊錢，所以能收回總額
-            splitters.forEach(s => {
-                balances[s] -= avg;    // 自己有享受到的份，要扣除
-            });
+            const avg = exp.amount / exp.splitWith.length;
+            balances[exp.paidBy] += exp.amount;
+            exp.splitWith.forEach(s => { balances[s] -= avg; });
         });
 
-        // 3. 區分欠錢者(負)與收錢者(正)
-        let debtors = [];
-        let creditors = [];
-
+        let debtors = [], creditors = [];
         for (let m in balances) {
-            if (balances[m] < -0.1) {
-                debtors.push({ name: m, amount: -balances[m] });
-            } else if (balances[m] > 0.1) {
-                creditors.push({ name: m, amount: balances[m] });
-            }
+            if (balances[m] < -0.1) debtors.push({ name: m, amount: -balances[m] });
+            else if (balances[m] > 0.1) creditors.push({ name: m, amount: balances[m] });
         }
 
-        // 4. 雙向指引最佳還錢路線
-        let html = '';
-        let i = 0, j = 0;
-
+        let html = '', i = 0, j = 0;
         while (i < debtors.length && j < creditors.length) {
-            let debtor = debtors[i];
-            let creditor = creditors[j];
+            let debtor = debtors[i], creditor = creditors[j];
             let settleAmount = Math.min(debtor.amount, creditor.amount);
 
             html += `
                 <div class="settle-route">
-                    <div>
-                        <span>${debtor.name}</span>
-                        <span class="route-arrow">➔</span>
-                        <span>${creditor.name}</span>
-                    </div>
+                    <div><span>${debtor.name}</span><span style="color:var(--accent-blue);margin:0 8px;">➔</span><span>${creditor.name}</span></div>
                     <div class="amount-txt">$${Math.round(settleAmount)}</div>
                 </div>
             `;
+            debtor.amount -= settleAmount; creditor.amount -= settleAmount;
+            if (debtor.amount < 0.1) i++; if (creditor.amount < 0.1) j++;
+        }
+        container.innerHTML = html || '<p style="text-align: center; color: #4caf50; font-size: 14px; padding: 10px 0;">✓ 帳目完全平分！</p>';
+    }
 
-            debtor.amount -= settleAmount;
-            creditor.amount -= settleAmount;
+    // ================= 🎮 遊戲邏輯區 =================
+    
+    // 遊戲 1：隨機抽籤（滾動特效）
+    function drawLuckyOne() {
+        if (members.length === 0) { alert('成員名單裡面沒有人可以抽喔！'); return; }
+        const display = document.getElementById('luckyDisplay');
+        let counter = 0;
+        
+        // 跑馬燈跳動效果
+        const interval = setInterval(() => {
+            const randomName = members[Math.floor(Math.random() * members.length)];
+            display.innerText = randomName;
+            counter++;
+            if (counter > 15) {
+                clearInterval(interval);
+                // 最終決定
+                const luckyOne = members[Math.floor(Math.random() * members.length)];
+                display.innerText = `🎉 ${luckyOne} 🎉`;
+            }
+        }, 80);
+    }
 
-            if (debtor.amount < 0.1) i++;
-            if (creditor.amount < 0.1) j++;
+    // 遊戲 2：交換禮物（Derangement 錯排演算法，保證不抽到自己）
+    function matchGifts() {
+        if (members.length < 2) { alert('至少需要 2 位成員才能進行交換禮物！'); return; }
+        const resultBox = document.getElementById('giftResultBox');
+        
+        let giver = [...members];
+        let receiver = [...members];
+        let valid = false;
+        let attempts = 0;
+
+        // 隨機打散直到沒有任何人抽到自己 (最多嘗試 500 次防死鎖)
+        while (!valid && attempts < 500) {
+            attempts++;
+            // 洗牌演算法 (Fisher-Yates)
+            for (let i = receiver.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [receiver[i], receiver[j]] = [receiver[j], receiver[i]];
+            }
+            
+            // 檢查是否有人抽到自己
+            valid = true;
+            for (let i = 0; i < giver.length; i++) {
+                if (giver[i] === receiver[i]) {
+                    valid = false;
+                    break;
+                }
+            }
         }
 
-        container.innerHTML = html || '<p style="text-align: center; color: #4caf50; font-size: 14px; padding: 10px 0;">✓ 帳目完全平分，太完美了！</p>';
+        // 顯示結果
+        resultBox.style.display = 'block';
+        let resultHtml = '<strong style="color:var(--primary-light);">🎁 交換禮物配對結果：</strong><br>';
+        for (let i = 0; i < giver.length; i++) {
+            resultHtml += `• <strong>${giver[i]}</strong> ➔ 抽中 <strong>${receiver[i]}</strong> 的禮物<br>`;
+        }
+        resultBox.innerHTML = resultHtml;
     }
+
+    // 初始化讀取
+    updateMemberUI();
+    updateExpenseListUI();
+    calculateSplit();
 </script>
 
 </body>
