@@ -502,7 +502,7 @@
                 if (!game) { resetGame(); return; }
 
                 if (game.gameOver) {
-                    msgDiv.innerHTML = `<span style="color:#ff003c;">${game.msg}</span>`;
+                    msgDiv.innerHTML = game.msg;
                     controls.style.display = 'none'; resetBtn.style.display = 'block';
                 } else {
                     msgDiv.innerHTML = `${game.min} ~ ${game.max}`;
