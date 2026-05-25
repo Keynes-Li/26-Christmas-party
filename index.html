@@ -263,6 +263,63 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
     <script>
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, flakes = [];
+
+        function setCanvasSize() {
+            const wrapper = document.querySelector('.app-wrapper');
+            width = canvas.width = wrapper.offsetWidth;
+            height = canvas.height = wrapper.offsetHeight;
+        }
+
+        class Flake {
+            constructor() { this.init(); }
+            init() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * -height; 
+                this.vy = Math.random() * 2 + 1;  
+                this.size = Math.random() * 3 + 1; 
+                // 科技聖誕微醺配色：螢光綠、霓虹紅、青白色
+                const colors = ['#0f0', '#ff003c', '#0ff'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.opacity = Math.random() * 0.5 + 0.5;
+            }
+            update() {
+                this.y += this.vy;
+                if (this.y > height) { this.init(); this.y = -10; } 
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.random() * Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.fill();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - this.size/2, this.y - 10, this.size, 10);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function initSnow() {
+            flakes = []; // 這裡已經修正囉！
+            const count = width < 400 ? 40 : 80;
+            for (let i = 0; i < count; i++) { flakes.push(new Flake()); }
+        }
+
+        function animateSnow() {
+            ctx.clearRect(0, 0, width, height);
+            flakes.forEach(f => { f.update(); f.draw(); });
+            requestAnimationFrame(animateSnow);
+        }
+
+        window.addEventListener('resize', setCanvasSize);
+        setCanvasSize();
+        initSnow();
+        animateSnow();
+        // ==========================================
+        // 👆 雪花動畫腳本結束 👆
+        // ==========================================
         // === [1] 基礎畫面路由切換 ===
         function enterApp() {
             document.getElementById('welcomeScreen').style.display = 'none';
