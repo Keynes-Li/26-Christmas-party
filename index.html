@@ -91,7 +91,7 @@
         #appContainer { display: none; flex-direction: column; width: 100%; height: 100%; padding: 20px; overflow-y: auto; }
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
-        .nav-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 20px; width: 100%; }
+        .nav-btns { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 20px; width: 100%; }
         .nav-btns button { padding: 10px 0; background: #1c2541; border: 1px solid #3a506b; color: var(--text-main); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.3s; }
         .nav-btns button.active { background: var(--neon-cyan); color: #0b132b; border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0,255,255,0.5); }
         .card { background-color: var(--card-bg); border: 1px solid #3a506b; border-radius: 16px; padding: 20px; margin-bottom: 20px; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
@@ -145,23 +145,33 @@
 
         <div id="appContainer">
             <div class="nav-btns">
+                <button id="nav-info" class="active" onclick="switchTab('info')">📅 資訊</button>
                 <button id="nav-accounting" class="active" onclick="switchTab('accounting')">💰 記帳</button>
                 <button id="nav-games" onclick="switchTab('games')">🎮 遊戲</button>
                 <button id="nav-gifts" onclick="switchTab('gifts')">🎁 抽禮物</button>
                 <button id="nav-scores" onclick="switchTab('scores')">🏆 記分板</button>
             </div>
 
-            <div id="accountingTab" class="tab-content active">
+            <div id="infoTab" class="tab-content active">
+                <div class="card" style="border-color: var(--neon-orange); background: linear-gradient(145deg, #111a33, #1b2644);">
+                    <h3 style="color: var(--neon-orange);">📌 2026 派對核心情報</h3>
+                    <div style="font-size: 14px; line-height: 1.6; color: #ccc;">
+                        🏢 <b>住宿地點：</b> 某某設計旅店 (15:00 後可 Check-in)<br>
+                        🚗 <b>飯店地址：</b> 台北市信義區OO路XX號<br>
+                        🍽️ <b>晚餐狂歡：</b> 18:30 頂級餐酒館 (預約大桌)
+                    </div>
+                </div>
                 <div class="card">
                     <h3>👥 派對成員名單</h3>
                     <div style="display: flex; gap: 8px; align-items: stretch;">
                         <input type="text" id="memberInput" placeholder="輸入名字..." style="margin: 0; flex: 1;">
-                        <button onclick="addMember()" style="padding: 0 20px; background: var(#CCFF00); border: none; color:--Neon Cyan; font-weight: bold; border-radius: 8px; cursor: pointer; white-space: nowrap;">新增</button>
+                        <button onclick="addMember()" style="padding: 0 20px; background: var(--neon-green); border: none; color: #050914; font-weight: bold; border-radius: 8px; cursor: pointer; white-space: nowrap;">新增</button>
                     </div>
                     <div id="memberTagsContainer" class="tag-container"></div>
                 </div>
-                <div class="card">
-                    <h3>📝 新增消費紀錄</h3>
+                <div id="accountingTab" class="tab-content">
+                    <div class="card">
+                        <h3>📝 新增消費紀錄</h3>
                     <input type="text" id="expensePurpose" placeholder="消費項目 (如：好市多披薩)">
                     <input type="number" id="expenseAmount" placeholder="金額">
                     <label style="font-size: 14px; color: var(--neon-cyan); margin-top: 6px; display: block;">誰付的錢：</label>
