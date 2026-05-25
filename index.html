@@ -154,18 +154,19 @@
 
             <div id="infoTab" class="tab-content active">
                 <div class="card" style="border-color: var(--neon-orange); background: linear-gradient(145deg, #111a33, #1b2644);">
-                    <h3 style="color: var(--neon-orange);">📌 2026 派對核心情報</h3>
+                    <h3 style="color: var(--neon-orange);">📌 2026 Christmas Party Information</h3>
                     <div style="font-size: 14px; line-height: 1.6; color: #ccc;">
-                        🏢 <b>住宿地點：</b> 某某設計旅店 (15:00 後可 Check-in)<br>
-                        🚗 <b>飯店地址：</b> 台北市信義區OO路XX號<br>
-                        🍽️ <b>晚餐狂歡：</b> 18:30 頂級餐酒館 (預約大桌)
+                        📅 <b>派對日期：</b> 2026/12/25 ~ 26<br>
+                        🏢 <b>住宿地點：</b> 99之6莊園<br>
+                        📍 <b>住宿地址：</b> 苗栗縣銅鑼鄉中平村99之6號<br>
+                        🍕 <b>午餐狂歡：</b> Costco (待議)
                     </div>
                 </div>
                 <div class="card">
                     <h3>👥 派對成員名單</h3>
                     <div style="display: flex; gap: 8px; align-items: stretch;">
                         <input type="text" id="memberInput" placeholder="輸入名字..." style="margin: 0; flex: 1;">
-                        <button onclick="addMember()" style="padding: 0 20px; background: var(--neon-green); border: none; color: #050914; font-weight: bold; border-radius: 8px; cursor: pointer; white-space: nowrap;">新增</button>
+                        <button onclick="addMember()" style="padding: 0 20px; background: var(--neon-cyan); border: none; color: #050914; font-weight: bold; border-radius: 8px; cursor: pointer; white-space: nowrap;">新增</button>
                     </div>
                     <div id="memberTagsContainer" class="tag-container"></div>
                 </div>
@@ -310,6 +311,7 @@
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
             flakes = []; // 進入 APP 後停止粒子計算
+            switchTab('info');
         }
 
         function switchTab(tabName) {
