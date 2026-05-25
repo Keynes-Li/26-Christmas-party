@@ -114,7 +114,7 @@
         .settle-item b { color: white; }
         .rank-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-deep); border: 1px solid #3a506b; border-radius: 6px; margin-bottom: 8px; }
         .rank-num { font-weight: bold; color: var(--neon-cyan); margin-right: 10px; font-family: monospace; font-size: 18px; }
-        .game-status { text-align: center; font-size: 24px; font-weight: bold; margin: 20px 0; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); min-height: 30px; font-family: monospace; }
+        .game-status { text-align: center; font-size: 24px; font-weight: bold; margin: 20px 0; min-height: 30px; font-family: monospace; }
         .gift-group-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #3a506b; }
         .gift-group-item select { width: auto; padding: 6px; margin: 0; font-size: 14px; background: #1a2a4a; }
         .result-box { background: var(--bg-deep); padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--neon-cyan); }
@@ -527,7 +527,7 @@
 
                 if (guess === game.answer) {
                     game.gameOver = true;
-                    game.msg = `🎉 💥 爆炸了！！<br>【 ${playerName} 】踩中地雷！<br>密碼是 ${game.answer}`;
+                    game.msg = `<span style="color: #ff9f1c;">💥 爆炸了 💥<br>【 ${playerName} 】喝一杯！</span><br><span style="color: #ff003c;">密碼是 ${game.answer}</span>`;
                 } else if (guess < game.answer) game.min = Math.max(game.min, guess);
                 else game.max = Math.min(game.max, guess);
                 db.ref('party_data/game').set(game).then(() => { document.getElementById('guessInput').value = ''; });
