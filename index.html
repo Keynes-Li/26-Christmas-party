@@ -2,11 +2,6 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="./icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0b132b">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>2026 Christmas Party</title>
     <style>
@@ -29,8 +24,8 @@
         .tab-content.active { display: block; }
         
         /* 上方切換頁按鈕 */
-        .nav-btns { display: flex; gap: 8px; margin-bottom: 20px; width: 100%; }
-        .nav-btns button { flex: 1; padding: 10px 5px; background: #1c2541; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .nav-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 20px; width: 100%; }
+        .nav-btns button { padding: 10px 0; background: #1c2541; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; }
         .nav-btns button.active { background: #90e0ef; color: #0b132b; }
         
         .welcome-btn { padding: 15px 30px; background: transparent; border: 1px solid #90e0ef; color: #90e0ef; border-radius: 30px; cursor: pointer; margin-top: 20px; font-size: 16px; letter-spacing: 2px; }
@@ -43,7 +38,6 @@
         input[type="text"], input[type="number"], select { width: 100%; padding: 12px; margin: 6px 0; background: #0b132b; border: 1px solid #3a506b; color: white; border-radius: 8px; font-size: 15px; }
         .action-btn { width: 100%; padding: 12px; background: #90e0ef; border: none; color: #0b132b; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; font-size: 15px; }
         .action-btn.secondary { background: transparent; border: 1px solid #ff0054; color: #ff0054; }
-        .action-btn.warning { background: #ff9f1c; color: #0b132b; border: none; }
 
         /* 成員標籤 */
         .tag-container { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -60,13 +54,13 @@
         .list-item-info { font-size: 14px; line-height: 1.4; }
         .delete-btn { background: #ff0054; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; }
 
-        /* 結算報告格式 */
+        /* 結算報告與排名 */
         .settle-item { padding: 8px 0; border-bottom: 1px dashed #3a506b; font-size: 15px; }
+        .rank-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #0b132b; border-bottom: 1px solid #3a506b; border-radius: 6px; margin-bottom: 8px; }
+        .rank-num { font-weight: bold; color: #90e0ef; margin-right: 15px; }
         
-        /* 遊戲專用樣式 */
+        /* 遊戲與抽獎專用樣式 */
         .game-status { text-align: center; font-size: 22px; font-weight: bold; margin: 20px 0; color: #90e0ef; min-height: 30px; line-height: 1.4; }
-        
-        /* 抽禮物分組清單 */
         .gift-group-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #3a506b; }
         .gift-group-item select { width: auto; padding: 6px; margin: 0; font-size: 14px; }
         .result-box { background: #0b132b; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 15px; }
@@ -80,7 +74,7 @@
         <div id="welcomeScreen">
             <h1>CHRISTMAS PARTY</h1>
             <p>2026</p>
-            <button class="welcome-btn" onclick="enterApp()">Go Drinking</button>
+            <button class="welcome-btn" onclick="enterApp()">LAUNCH SYSTEM</button>
         </div>
 
         <div id="appContainer">
@@ -88,10 +82,10 @@
                 <button id="nav-accounting" class="active" onclick="switchTab('accounting')">💰 記帳</button>
                 <button id="nav-games" onclick="switchTab('games')">🎮 遊戲</button>
                 <button id="nav-gifts" onclick="switchTab('gifts')">🎁 抽禮物</button>
+                <button id="nav-scores" onclick="switchTab('scores')">🏆 記分板</button>
             </div>
 
             <div id="accountingTab" class="tab-content active">
-                
                 <div class="card">
                     <h3>👥 派對成員名單</h3>
                     <div style="display: flex; gap: 8px; align-items: stretch;">
@@ -124,7 +118,6 @@
                     <h3>✨ 最速捷轉帳結算</h3>
                     <div id="settlementContainer"></div>
                 </div>
-
             </div>
 
             <div id="gamesTab" class="tab-content">
@@ -147,12 +140,10 @@
             </div>
 
             <div id="giftsTab" class="tab-content">
-                
                 <div class="card">
                     <h3>🏷️ 好禮物分組設定</h3>
                     <p style="font-size: 13px; color: #5c677d; margin-bottom: 10px;">請為大家選擇好禮物的價格組別，設定會即時同步。</p>
-                    <div id="giftGroupContainer">
-                        </div>
+                    <div id="giftGroupContainer"></div>
                 </div>
 
                 <div class="card">
@@ -168,11 +159,22 @@
                 </div>
 
                 <button class="action-btn secondary" onclick="resetGiftResults()" style="margin-bottom: 30px;">🔄 重新抽籤 (需輸入密碼)</button>
+            </div>
 
+            <div id="scoresTab" class="tab-content">
+                <div class="card">
+                    <h3>🏆 即時遊戲排名</h3>
+                    <div id="leaderboard"></div>
+                </div>
+                <div class="card">
+                    <h3>🎛️ 加扣分控制台</h3>
+                    <select id="scorePlayerSelect"></select>
+                    <input type="number" id="scoreChange" placeholder="請輸入分數 (扣分請加負號，如 -10)">
+                    <button class="action-btn" onclick="updateScore()">送出變更</button>
+                </div>
             </div>
 
         </div>
-
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -209,8 +211,9 @@
         // 全域變數
         let members = [];
         let expenses = {};
-        let giftTiers = {}; // 紀錄每人的組別 { "小明": "1500", "小華": "500" }
-        let giftResults = { good: null, bad: null }; // 紀錄抽籤結果
+        let giftTiers = {}; 
+        let giftResults = { good: null, bad: null }; 
+        let scores = {}; // 紀錄分數
 
         // === [3] 成員功能邏輯 ===
         function addMember() {
@@ -231,7 +234,6 @@
         }
 
         function updateMemberUI() {
-            // 記帳頁面
             const tagsContainer = document.getElementById('memberTagsContainer');
             tagsContainer.innerHTML = members.length ? '' : '<span style="color:#5c677d; font-size:14px; margin-top:8px;">暫無成員，請從上方新增</span>';
             members.forEach(m => {
@@ -248,7 +250,6 @@
                 splitContainer.innerHTML += `<label class="checkbox-label"><input type="checkbox" name="splitMember" value="${m}" checked> ${m}</label>`;
             });
 
-            // 遊戲頁面
             const gamePlayerSelect = document.getElementById('gamePlayerSelect');
             if(gamePlayerSelect) {
                 let currentVal = gamePlayerSelect.value;
@@ -257,8 +258,8 @@
                 if(members.includes(currentVal)) gamePlayerSelect.value = currentVal; 
             }
 
-            // 更新抽禮物分組介面
             renderGiftGroupUI();
+            updateScoreUI(); // 更新成員時同步更新記分板名單
         }
 
         // === [4] 記帳核心功能 ===
@@ -384,9 +385,7 @@
             });
         }
 
-        // === [6] 🎁 抽禮物專區邏輯 ===
-
-        // 更新分組介面
+        // === [6] 抽禮物專區邏輯 ===
         function renderGiftGroupUI() {
             const container = document.getElementById('giftGroupContainer');
             if (members.length === 0) {
@@ -414,18 +413,15 @@
             db.ref(`party_data/gift_tiers/${member}`).set(tier);
         }
 
-        // 核心演算法：錯排洗牌 (自己不能抽到自己)
         function shuffleDerangement(arr) {
-            if (arr.length <= 1) return null; // 1個人無法不抽到自己
+            if (arr.length <= 1) return null; 
             let copy = [...arr];
             let isDerangement = false;
             while (!isDerangement) {
-                // Fisher-Yates 洗牌
                 for (let i = copy.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [copy[i], copy[j]] = [copy[j], copy[i]];
                 }
-                // 檢查是否有人在原位 (自己抽到自己)
                 isDerangement = true;
                 for (let i = 0; i < arr.length; i++) {
                     if (arr[i] === copy[i]) { isDerangement = false; break; }
@@ -435,7 +431,6 @@
         }
 
         function drawGoodGifts() {
-            // 將人員依照 1500, 1000, 500 分組
             let groups = { "1500": [], "1000": [], "500": [] };
             members.forEach(m => {
                 let tier = giftTiers[m];
@@ -454,7 +449,6 @@
                 }
                 if (groupMembers.length > 1) {
                     let shuffled = shuffleDerangement(groupMembers);
-                    // 紀錄 抽籤人 -> 抽到誰的禮物
                     newResults[t] = groupMembers.map((m, i) => ({ drawer: m, gotGiftFrom: shuffled[i] }));
                 }
             }
@@ -467,16 +461,12 @@
         }
 
         function drawBadGifts() {
-            if (members.length <= 1) {
-                alert("人數不足，無法進行壞禮物抽籤！");
-                return;
-            }
+            if (members.length <= 1) { alert("人數不足，無法進行壞禮物抽籤！"); return; }
             let shuffled = shuffleDerangement(members);
             let newResults = members.map((m, i) => ({ drawer: m, gotGiftFrom: shuffled[i] }));
             db.ref('party_data/gift_results/bad').set(newResults);
         }
 
-        // 隱藏密碼防護：重置抽籤結果
         function resetGiftResults() {
             let pwd = prompt("主辦人專用：請輸入管理員密碼以重置抽籤結果");
             if (pwd === "9527") {
@@ -487,14 +477,12 @@
             }
         }
 
-        // 監聽並渲染抽籤結果畫面
         function renderGiftResultsUI() {
             const goodBox = document.getElementById('goodGiftResultsContainer');
             const badBox = document.getElementById('badGiftResultsContainer');
             const drawGoodBtn = document.getElementById('drawGoodBtn');
             const drawBadBtn = document.getElementById('drawBadBtn');
 
-            // 處理好禮物
             if (giftResults && giftResults.good) {
                 drawGoodBtn.style.display = 'none';
                 goodBox.style.display = 'block';
@@ -512,7 +500,6 @@
                 goodBox.style.display = 'none';
             }
 
-            // 處理壞禮物
             if (giftResults && giftResults.bad) {
                 drawBadBtn.style.display = 'none';
                 badBox.style.display = 'block';
@@ -526,11 +513,59 @@
             }
         }
 
-        // === [7] 資料即時監聽掛載 ===
+        // === [7] 記分板模組 ===
+        function updateScoreUI() {
+            const board = document.getElementById('leaderboard');
+            const select = document.getElementById('scorePlayerSelect');
+            if(!board || !select) return;
+
+            board.innerHTML = '';
+            select.innerHTML = '<option value="">-- 選擇玩家 --</option>';
+
+            if (members.length === 0) {
+                board.innerHTML = '<div style="color:#5c677d; font-size:14px; text-align:center;">請先至記帳頁面新增成員</div>';
+                return;
+            }
+
+            // 將成員對應目前分數，並進行排序
+            let memberScores = members.map(m => {
+                return { name: m, score: scores[m] || 0 };
+            });
+
+            // 依分數由高到低排序
+            memberScores.sort((a, b) => b.score - a.score);
+
+            memberScores.forEach((ms, index) => {
+                // 第一名特別樣式
+                let rankStyle = index === 0 ? 'color: #ff9f1c; font-size: 18px;' : 'color: #edf2f4; font-size: 15px;';
+                
+                board.innerHTML += `
+                    <div class="rank-row">
+                        <span><span class="rank-num">#${index + 1}</span> ${ms.name}</span>
+                        <b style="${rankStyle}">${ms.score} 分</b>
+                    </div>`;
+                select.innerHTML += `<option value="${ms.name}">${ms.name}</option>`;
+            });
+        }
+
+        function updateScore() {
+            const name = document.getElementById('scorePlayerSelect').value;
+            const change = parseInt(document.getElementById('scoreChange').value);
+            if (!name || isNaN(change)) { alert("請選擇玩家並輸入分數！"); return; }
+
+            let current = scores[name] || 0;
+            db.ref(`party_data/scores/${name}`).set(current + change).then(() => {
+                document.getElementById('scoreChange').value = '';
+                // 不用 alert，讓畫面直接順暢更新即可，體驗更好
+            });
+        }
+
+        // === [8] 資料即時監聽掛載 ===
         db.ref('party_data/members').on('value', (snapshot) => { members = snapshot.val() || []; updateMemberUI(); });
         db.ref('party_data/expenses').on('value', (snapshot) => { expenses = snapshot.val() || {}; updateExpenseAndSettlementUI(); });
         db.ref('party_data/gift_tiers').on('value', (snapshot) => { giftTiers = snapshot.val() || {}; renderGiftGroupUI(); });
         db.ref('party_data/gift_results').on('value', (snapshot) => { giftResults = snapshot.val() || { good: null, bad: null }; renderGiftResultsUI(); });
+        db.ref('party_data/scores').on('value', (snapshot) => { scores = snapshot.val() || {}; updateScoreUI(); });
         
         initGameSync();
     </script>
