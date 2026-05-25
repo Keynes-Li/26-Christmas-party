@@ -154,6 +154,7 @@
     <div class="app-wrapper">
         
         <div id="welcomeScreen">
+            <canvas id="snowCanvas"></canvas>
             <h1>CHRISTMAS PARTY</h1>
             <p>2026</p>
             <button class="welcome-btn" onclick="enterApp()">Go Dirinking</button>
@@ -264,6 +265,9 @@
 
     <script>
         const canvas = document.getElementById('snowCanvas');
+        if (canvas) {  // 加上這行 if 保護
+            const ctx = canvas.getContext('2d');
+            let width, height, flakes = [];
         const ctx = canvas.getContext('2d');
         let width, height, flakes = [];
 
