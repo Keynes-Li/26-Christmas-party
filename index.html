@@ -74,7 +74,7 @@
         <div id="welcomeScreen">
             <h1>CHRISTMAS PARTY</h1>
             <p>2026</p>
-            <button class="welcome-btn" onclick="enterApp()">LAUNCH SYSTEM</button>
+            <button class="welcome-btn" onclick="enterApp()">Go Dirinking</button>
         </div>
 
         <div id="appContainer">
@@ -147,7 +147,7 @@
                 </div>
 
                 <div class="card">
-                    <h3>🎁 抽好禮物 (依組別)</h3>
+                    <h3>🎁 抽好禮物 (依組別代碼)</h3>
                     <div id="goodGiftResultsContainer" class="result-box" style="display:none; margin-bottom: 15px;"></div>
                     <button id="drawGoodBtn" class="action-btn" onclick="drawGoodGifts()">🎲 進行好禮物抽籤</button>
                 </div>
@@ -259,7 +259,7 @@
             }
 
             renderGiftGroupUI();
-            updateScoreUI(); // 更新成員時同步更新記分板名單
+            updateScoreUI();
         }
 
         // === [4] 記帳核心功能 ===
@@ -385,7 +385,7 @@
             });
         }
 
-        // === [6] 抽禮物專區邏輯 ===
+        // === [6] 抽禮物專區邏輯 (好禮物改為代碼制) ===
         function renderGiftGroupUI() {
             const container = document.getElementById('giftGroupContainer');
             if (members.length === 0) {
@@ -413,6 +413,7 @@
             db.ref(`party_data/gift_tiers/${member}`).set(tier);
         }
 
+        // 壞禮物保留錯排演算法 (誰抽到誰)
         function shuffleDerangement(arr) {
             if (arr.length <= 1) return null; 
             let copy = [...arr];
@@ -442,14 +443,21 @@
 
             for (let t in groups) {
                 let groupMembers = groups[t];
-                if (groupMembers.length === 1) {
-                    alert(`❌ 錯誤：【${t}元組】只有一個人，無法進行抽籤喔！請先調整分組。`);
-                    hasError = true;
-                    break;
-                }
-                if (groupMembers.length > 1) {
-                    let shuffled = shuffleDerangement(groupMembers);
-                    newResults[t] = groupMembers.map((m, i) => ({ drawer: m, gotGiftFrom: shuffled[i] }));
+                if (groupMembers.length > 0) {
+                    // 動態產生對應人數的 A, B, C... 陣列
+                    let letters = [];
+                    for (let i = 0; i < groupMembers.length; i++) {
+                        letters.push(String.fromCharCode(65 + i)); 
+                    }
+                    
+                    // 洗牌字母代碼
+                    for (let i = letters.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [letters[i], letters[j]] = [letters[j], letters[i]];
+                    }
+                    
+                    // 將洗牌後的字母發給該組成員
+                    newResults[t] = groupMembers.map((m, i) => ({ drawer: m, gotGiftCode: letters[i] }));
                 }
             }
 
@@ -483,6 +491,7 @@
             const drawGoodBtn = document.getElementById('drawGoodBtn');
             const drawBadBtn = document.getElementById('drawBadBtn');
 
+            // 好禮物顯示 (改為顯示代碼 A,B,C)
             if (giftResults && giftResults.good) {
                 drawGoodBtn.style.display = 'none';
                 goodBox.style.display = 'block';
@@ -491,7 +500,8 @@
                     if (giftResults.good[t]) {
                         goodBox.innerHTML += `<div style="color:#ff9f1c; font-weight:bold; margin: 10px 0 5px 0;">✨ ${t}元組：</div>`;
                         giftResults.good[t].forEach(res => {
-                            goodBox.innerHTML += `<div class="result-row"><b>${res.drawer}</b> 抽到 👉 <b>${res.gotGiftFrom}</b> 的禮物</div>`;
+                            let display = res.gotGiftCode ? `禮物 ${res.gotGiftCode}` : res.gotGiftFrom;
+                            goodBox.innerHTML += `<div class="result-row"><b>${res.drawer}</b> 抽到 👉 <b style="color:#70e000;">${display}</b></div>`;
                         });
                     }
                 });
@@ -500,6 +510,7 @@
                 goodBox.style.display = 'none';
             }
 
+            // 壞禮物顯示 (保留顯示誰抽到誰)
             if (giftResults && giftResults.bad) {
                 drawBadBtn.style.display = 'none';
                 badBox.style.display = 'block';
@@ -527,16 +538,13 @@
                 return;
             }
 
-            // 將成員對應目前分數，並進行排序
             let memberScores = members.map(m => {
                 return { name: m, score: scores[m] || 0 };
             });
 
-            // 依分數由高到低排序
             memberScores.sort((a, b) => b.score - a.score);
 
             memberScores.forEach((ms, index) => {
-                // 第一名特別樣式
                 let rankStyle = index === 0 ? 'color: #ff9f1c; font-size: 18px;' : 'color: #edf2f4; font-size: 15px;';
                 
                 board.innerHTML += `
@@ -556,7 +564,6 @@
             let current = scores[name] || 0;
             db.ref(`party_data/scores/${name}`).set(current + change).then(() => {
                 document.getElementById('scoreChange').value = '';
-                // 不用 alert，讓畫面直接順暢更新即可，體驗更好
             });
         }
 
