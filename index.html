@@ -527,7 +527,9 @@
 
                 if (guess === game.answer) {
                     game.gameOver = true;
-                    game.msg = `<span style="color: #ff9f1c;">💥 爆炸了 💥<br>【 ${playerName} 】喝一杯！</span><br><span style="color: #ff003c;">密碼是 ${game.answer}</span>`;
+                    // 👇 用這行徹底綁定每一行的顏色（第一二行橘色、第三行紅色） 👇
+                    game.msg = `<span style="color: #ff9f1c !important;">💥 爆炸了 💥</span><br><span style="color: #ff9f1c !important;">【 ${playerName} 】喝一杯！</span><br><span style="color: #ff003c !important;">密碼是 ${game.answer}</span>`;
+                    // 👆 加入了 !important 確保絕對不會被外層的 CSS 樣式蓋過去 👆
                 } else if (guess < game.answer) game.min = Math.max(game.min, guess);
                 else game.max = Math.min(game.max, guess);
                 db.ref('party_data/game').set(game).then(() => { document.getElementById('guessInput').value = ''; });
