@@ -662,6 +662,110 @@
         }
 
         // === 7. 計分板模組 ===
+        // 全域變數，用來儲存目前的組別狀態
+        let currentGroups = []; 
+        // 1. 隨機分組核心邏輯
+        function generateGroups() {
+            // 假設你的成員陣列叫做 members
+            if (!members || members.length === 0) {
+                alert("請先在「資訊」分頁新增派對成員！");
+                return;
+            }
+            
+            const numGroups = parseInt(document.getElementById('groupCount').value);
+            
+            // 複製一份成員名單並打亂順序 (洗牌演算法)
+            let shuffled = [...members].sort(() => 0.5 - Math.random());
+            
+            // 建立指定數量的空陣列作為組別
+            currentGroups = Array.from({ length: numGroups }, () => []);
+            
+            // 依序像發牌一樣把成員派發到各組
+            shuffled.forEach((member, index) => {
+                currentGroups[index % numGroups].push(member);
+            });
+            
+            renderGroups();
+            updateGroupSelect(); // 同步更新計分板的下拉選單
+        }
+
+        // 2. 顯示分組結果在遊戲區
+        function renderGroups() {
+            const container = document.getElementById('groupResultContainer');
+            container.innerHTML = ''; // 先清空舊結果
+            
+            currentGroups.forEach((group, index) => {
+                const groupDiv = document.createElement('div');
+                groupDiv.style.background = 'rgba(255, 255, 255, 0.05)';
+                groupDiv.style.border = '1px solid var(--neon-cyan)';
+                groupDiv.style.borderRadius = '8px';
+                groupDiv.style.padding = '10px';
+                
+                const title = document.createElement('div');
+                title.innerText = `第 ${index + 1} 組`;
+                title.style.color = 'var(--neon-cyan)';
+                title.style.fontWeight = 'bold';
+                title.style.marginBottom = '8px';
+                title.style.borderBottom = '1px solid rgba(0, 255, 255, 0.2)';
+                title.style.paddingBottom = '5px';
+
+                const membersList = document.createElement('div');
+                membersList.style.color = '#ccc';
+                membersList.style.fontSize = '14px';
+                membersList.style.lineHeight = '1.8';
+                // 將陣列裡的成員用 <br> 換行顯示
+                membersList.innerHTML = group.join('<br>') || '<span style="color:#555;">無人</span>';
+                groupDiv.appendChild(title);
+                groupDiv.appendChild(membersList);
+                container.appendChild(groupDiv);
+            });
+        }
+
+        // 3. 更新計分板的「群組加分」下拉選單
+        function updateGroupSelect() {
+            const select = document.getElementById('groupSelect');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">請選擇組別...</option>';
+            currentGroups.forEach((group, index) => {
+                if (group.length > 0) {
+                    const option = document.createElement('option');
+                    option.value = index; // 用 index 紀錄是哪一組
+                    option.innerText = `第 ${index + 1} 組 (${group.join(', ')})`;
+                    select.appendChild(option);
+                }
+            });
+        }
+        // 4. 組別集體加分 (!!! 需配合你的計分邏輯微調 !!!)
+        function addGroupScore() {
+            const groupIndex = document.getElementById('groupSelect').value;
+            const scoreToAdd = parseInt(document.getElementById('groupScoreInput').value);
+            
+            if (groupIndex === "" || isNaN(scoreToAdd)) {
+                alert("請選擇組別並輸入有效的分數！");
+                return;
+            }
+
+            const targetGroup = currentGroups[groupIndex];
+    
+            // 👇👇👇 請注意這裡 👇👇👇
+            // 以下迴圈會歷遍該組的所有成員。
+            // 假設你用來紀錄分數的全域變數叫做 scores (例如 scores['李翊群'] = 10)
+            targetGroup.forEach(member => {
+                if (typeof scores[member] !== 'undefined') {
+                    scores[member] += scoreToAdd;
+                } else {
+                    scores[member] = scoreToAdd; // 預防萬一還沒有紀錄
+                }
+            });
+            // 👆👆👆 👆👆👆 👆👆👆
+            document.getElementById('groupScoreInput').value = ''; // 清空輸入框
+    
+            // 記得在這裡呼叫你原本用來重新繪製記分板畫面的函式！
+            // 例如： renderScoreboard(); 或 updateScores();
+    
+            alert(`🎉 已成功為 第 ${parseInt(groupIndex) + 1} 組全體加上 ${scoreToAdd} 分！`);
+        }
         function updateScoreUI() {
             const board = document.getElementById('leaderboard');
             const select = document.getElementById('scorePlayerSelect');
