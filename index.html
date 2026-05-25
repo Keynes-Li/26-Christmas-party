@@ -194,6 +194,21 @@
             </div>
 
             <div id="gamesTab" class="tab-content">
+                <div class="card" style="border-color: var(--neon-cyan);">
+                    <h3 style="color: var(--neon-cyan);">🎲 隨機分組器</h3>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                        <span style="color: #ccc;">分成幾組：</span>
+                        <select id="groupCount" style="background: #111a33; color: white; border: 1px solid var(--neon-cyan); padding: 5px; border-radius: 5px;">
+                            <option value="2">2 組</option>
+                            <option value="3">3 組</option>
+                            <option value="4">4 組</option>
+                            <option value="5">5 組</option>
+                        </select>
+                        <button onclick="generateGroups()" style="padding: 5px 15px; background: var(--neon-cyan); color: #050914; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">開始分組</button>
+                    </div>
+                    <div id="groupResultContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px;">
+                    </div>
+                </div>
                 <div class="card">
                     <h3>💣 終極密碼</h3>
                     <p style="font-size: 14px; color: #888; text-align: center;">雲端同步，炸彈隨時爆炸！</p>
@@ -232,6 +247,16 @@
                     <h3>🏆 實時排名</h3>
                     <div id="leaderboard"></div>
                 </div>
+                <div class="card" style="border-color: var(--neon-orange);">
+                    <h3 style="color: var(--neon-orange);">🚀 組別集體加分</h3>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <select id="groupSelect" style="flex: 1; background: #111a33; color: white; border: 1px solid var(--neon-orange); padding: 8px; border-radius: 5px;">
+            <option value="">請先到遊戲區進行分組...</option>
+        </select>
+        <input type="number" id="groupScoreInput" placeholder="分數" style="width: 80px; background: #111a33; color: white; border: 1px solid var(--neon-orange); padding: 8px; border-radius: 5px;">
+        <button onclick="addGroupScore()" style="padding: 8px 15px; background: var(--neon-orange); color: #050914; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; white-space: nowrap;">全組加分</button>
+    </div>
+</div>
                 <div class="card">
                     <h3>🎛️ 分數調整</h3>
                     <select id="scorePlayerSelect"></select>
