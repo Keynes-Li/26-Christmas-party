@@ -762,6 +762,7 @@
             document.getElementById('groupScoreInput').value = ''; // 清空輸入框
     
             // 記得在這裡呼叫你原本用來重新繪製記分板畫面的函式！
+            updateScoreUI()
             // 例如： renderScoreboard(); 或 updateScores();
     
             alert(`🎉 已成功為 第 ${parseInt(groupIndex) + 1} 組全體加上 ${scoreToAdd} 分！`);
